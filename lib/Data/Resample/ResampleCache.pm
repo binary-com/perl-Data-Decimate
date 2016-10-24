@@ -24,6 +24,12 @@ sub resample_cache_backfill {
         $self->_add($tick, $ticks_key, $fast_insert);
     }
 
+    return $self->_aggregate({
+        symbol    => $symbol,
+        end_epoch => $end,
+        ticks     => $ticks,
+    });
+
     return;
 }
 
