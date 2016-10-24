@@ -6,6 +6,8 @@ use warnings;
 use 5.010;
 use Moose;
 
+use Cache::RedisDB;
+
 =head1 NAME
 
 Data::Resample 
@@ -45,57 +47,20 @@ if you don't export anything, such as for a purely object-oriented module.
 
 =head2 resample_cache_size
 
-=head2 redis
-
 =cut
 
 has sampling_frequency  => (is => 'rw');
 has tick_cache_size     => (is => 'rw');
 has resample_cache_size => (is => 'rw');
-has redis               => (is => 'rw');
-
-=head2 ticks_cache
-
-=cut
-
-has ticks_cache => (
-    is      => 'ro',
-    lazy    => 1,
-    builder => '_build_ticks_cache',
-);
-
-sub _build_ticks_cache {
-
-}
-
-=head2 resample_cache
-
-=cut
-
-has resample_cache => (
-    is      => 'ro',
-    lazy    => 1,
-    builder => '_build_resample_cache',
-);
-
-sub _build_resample_cache {
-
-}
 
 =head1 SUBROUTINES/METHODS
 
-=head2 function1
+=head2 _redis
 
 =cut
 
-sub function1 {
-}
-
-=head2 function2
-
-=cut
-
-sub function2 {
+sub _redis {
+    return Cache::RedisDB->redis;
 }
 
 =head1 AUTHOR
