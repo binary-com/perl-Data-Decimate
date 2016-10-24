@@ -124,7 +124,7 @@ sub _aggregate {
 
     my $ul    = $args->{symbol};
     my $end   = $args->{end_epoch} || time;
-    my @ticks = $args->{ticks};
+    my $ticks = $args->{ticks};
 
     my $ai = 15;                          #15sec
     my $last_agg = $end - ($end % $ai);
@@ -137,11 +137,11 @@ sub _aggregate {
     my $count = 0;
 
     if ($ticks) {
-        my $first_tick = $ticks[0];
+        my $first_tick = $$ticks[0];
         my $prev_tick  = $first_tick;
         my $offset     = $first_tick->{epoch} % $ai;
         my $prev_agg   = $first_tick->{epoch} - $offset;
-        shift @ticks unless $offset;    # Caught tail end of previous period.
+        shift @$ticks unless $offset;    # Caught tail end of previous period.
         my $next_agg   = $prev_agg + $ai;
         my $tick_count = 0;
 
@@ -166,7 +166,7 @@ sub _aggregate {
                     _update($redis, $agg_key, $next_agg, $self->encoder->encode($prev_tick));
                     $next_agg += $ai;
                     $tick_count = 0;
-                    unshift @ticks, $tick if ($tick->{epoch} == $next_agg);    # Let the above code handle this.
+                    unshift @$ticks, $tick if ($tick->{epoch} == $next_agg);    # Let the above code handle this.
                 }
             } else {
                 # Skipped.
