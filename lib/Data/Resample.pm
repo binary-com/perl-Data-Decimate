@@ -135,7 +135,7 @@ sub _aggregate {
 
     my $count = 0;
 
-    if ($ticks = $args->{ticks}) {
+    if (my $ticks = $args->{ticks}) {
         my $first_tick = $ticks[0];
         my $prev_tick  = $first_tick;
         my $offset     = $first_tick->{epoch} % $ai;
