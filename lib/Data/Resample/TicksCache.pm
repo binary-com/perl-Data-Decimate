@@ -28,7 +28,7 @@ sub tick_cache_insert {
     $to_store{count} = 1;    # These are all single ticks;
     my $key = $self->_make_key($to_store{symbol}, 0);
 
-    return _update($self->_redis, $key, $tick->{epoch}, $encoder->encode(\%to_store));
+    return _update($self->_redis, $key, $tick->{epoch}, $self->encoder->encode(\%to_store));
 }
 
 =head2 tick_cache_get_num_ticks
@@ -48,7 +48,7 @@ sub tick_cache_get_num_ticks {
     my $redis = $self->_redis;
     my @res;
 
-    @res = map { $decoder->decode($_) } reverse @{$redis->zrevrangebyscore($self->_make_key($symbol, 0), $end, 0, 'LIMIT', 0, $num)};
+    @res = map { $self->decoder->decode($_) } reverse @{$redis->zrevrangebyscore($self->_make_key($symbol, 0), $end, 0, 'LIMIT', 0, $num)};
 
     return \@res;
 }

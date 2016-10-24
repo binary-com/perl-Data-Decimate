@@ -25,6 +25,10 @@ WriteMakefile(
     },
     PREREQ_PM => {
         'Cache::RedisDB'              => 0,
+        'Scalar::Util'                => 0,
+        'List::Util'                  => 0,
+        'Sereal::Encoder'             => 0,
+        'Sereal::Decoder'             => 0,
     },
     dist  => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
     clean => { FILES => 'Data-Resample-*' },
