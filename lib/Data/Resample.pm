@@ -63,6 +63,34 @@ sub _redis {
     return Cache::RedisDB->redis;
 }
 
+=head2 _make_key
+
+=cut
+
+sub _make_key {
+    my ($self, $symbol, $agg) = @_;
+
+    my @bits = ("AGGTICKS", $symbol);
+    if ($agg) {
+        push @bits, ($self->sampling_frequency, 'AGG');
+    } else {
+        push @bits, ('31m', 'FULL');
+    }
+
+    return join('_', @bits);
+}
+
+=head2 _update
+
+=cut 
+
+sub _update {
+    my ($redis, $key, $score, $value, $fast_insert) = @_;
+
+    $redis->zremrangebyscore($key, $score, $score) unless ($fast_insert);
+    return $redis->zadd($key, $score, $value);
+}
+
 =head1 AUTHOR
 
 Binary.com, C<< <support at binary.com> >>
