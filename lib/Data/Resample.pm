@@ -1,12 +1,14 @@
 package Data::Resample;
 
-use 5.006;
 use strict;
 use warnings;
 
+use 5.010;
+use Moose;
+
 =head1 NAME
 
-Data::Resample - The great new Data::Resample!
+Data::Resample 
 
 =head1 VERSION
 
@@ -15,7 +17,6 @@ Version 0.01
 =cut
 
 our $VERSION = '0.01';
-
 
 =head1 SYNOPSIS
 
@@ -32,6 +33,54 @@ Perhaps a little code snippet.
 
 A list of functions that can be exported.  You can delete this section
 if you don't export anything, such as for a purely object-oriented module.
+
+=cut
+
+=head1 ATTRIBUTES
+=cut
+
+=head2 sampling_frequency
+
+=head2 tick_cache_size
+
+=head2 resample_cache_size
+
+=head2 redis
+
+=cut
+
+has sampling_frequency  => (is => 'rw');
+has tick_cache_size     => (is => 'rw');
+has resample_cache_size => (is => 'rw');
+has redis               => (is => 'rw');
+
+=head2 ticks_cache
+
+=cut
+
+has ticks_cache => (
+    is      => 'ro',
+    lazy    => 1,
+    builder => '_build_ticks_cache',
+);
+
+sub _build_ticks_cache {
+
+}
+
+=head2 resample_cache
+
+=cut
+
+has resample_cache => (
+    is      => 'ro',
+    lazy    => 1,
+    builder => '_build_resample_cache',
+);
+
+sub _build_resample_cache {
+
+}
 
 =head1 SUBROUTINES/METHODS
 
@@ -138,4 +187,9 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 =cut
 
-1; # End of Data::Resample
+# End of Data::Resample
+no Moose;
+
+__PACKAGE__->meta->make_immutable;
+
+1;
