@@ -15,5 +15,6 @@ before_install:
     - perl -V
     - "cpanm -n Moose"
     - "cpanm -n List::Util"
+    - "cpanm -n Cache::RedisDB"
 script:
   perl Makefile.PL && RELEASE_TESTING=1 make test
