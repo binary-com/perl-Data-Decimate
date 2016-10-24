@@ -6,6 +6,10 @@ use warnings;
 use 5.010;
 use Moose;
 
+use Scalar::Util qw( blessed );
+use Sereal::Encoder;
+use Sereal::Decoder;
+
 extends 'Data::Resample';
 
 =head1 SUBROUTINES/METHODS
@@ -29,10 +33,24 @@ sub tick_cache_insert {
 
 =head2 tick_cache_get_num_ticks
 
+Retrieve num number of ticks from TicksCache.
+
 =cut
 
 sub tick_cache_get_num_ticks {
+   
+    my ($self, $args) = @_;
 
+    my $symbol      = $args->{symbol};
+    my $end        = $args->{end_epoch} || time;
+    my $num         = $args->{num} || 1;    
+
+    my $redis       = $self->_redis;
+    my @res;
+
+    @res = map { $decoder->decode($_) } reverse @{$redis->zrevrangebyscore($self->_make_key($symbol, 0), $end, 0, 'LIMIT', 0, $num)};
+
+    return \@res;
 }
 
 no Moose;

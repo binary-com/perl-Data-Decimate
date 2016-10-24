@@ -7,6 +7,8 @@ use 5.010;
 use Moose;
 
 use Cache::RedisDB;
+use Sereal::Encoder;
+use Sereal::Decoder;
 
 =head1 NAME
 
@@ -49,9 +51,31 @@ if you don't export anything, such as for a purely object-oriented module.
 
 =cut
 
-has sampling_frequency  => (is => 'rw');
-has tick_cache_size     => (is => 'rw');
-has resample_cache_size => (is => 'rw');
+has sampling_frequency  => (is => 'ro');
+has tick_cache_size     => (is => 'ro');
+has resample_cache_size => (is => 'ro');
+
+has decoder => (
+    is      => 'ro',
+    lazy    => 1,
+    builder => '_build_decoder',
+);
+
+sub _build_decoder {
+    return Sereal::Decoder->new;
+}
+
+has encoder => (
+    is      => 'ro',
+    lazy    => 1,
+    builder => '_build_encoder',
+);
+
+sub _build_encoder {
+    return Sereal::Encoder->new({
+        canonical => 1,
+    });
+}
 
 =head1 SUBROUTINES/METHODS
 
