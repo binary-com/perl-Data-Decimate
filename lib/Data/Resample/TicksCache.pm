@@ -6,6 +6,8 @@ use warnings;
 use 5.010;
 use Moose;
 
+extends 'Data::Resample';
+
 =head1 SUBROUTINES/METHODS
 
 =head2 tick_cache_insert

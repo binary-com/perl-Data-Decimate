@@ -6,6 +6,8 @@ use warnings;
 use 5.010;
 use Moose;
 
+extends 'Data::Resample';
+
 =head1 SUBROUTINES/METHODS
 
 =head2 resample_cache_backfill
@@ -23,7 +25,6 @@ sub resample_cache_backfill {
 sub resample_cache_get {
 
 }
-
 
 no Moose;
 
