@@ -25,6 +25,7 @@ WriteMakefile(
     },
     PREREQ_PM => {
         'Cache::RedisDB'              => 0,
+        'Date::Utility'               => 0,
         'Scalar::Util'                => 0,
         'List::Util'                  => 0,
         'Sereal::Encoder'             => 0,

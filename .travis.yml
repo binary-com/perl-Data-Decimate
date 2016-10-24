@@ -16,6 +16,7 @@ before_install:
     - "cpanm -n Moose"
     - "cpanm -n List::Util"
     - "cpanm -n Cache::RedisDB"
+    - "cpanm -n Date::Utility"
     - "cpanm -n Scalar::Util"
     - "cpanm -n Sereal::Encoder"
     - "cpanm -n Sereal::Decoder"

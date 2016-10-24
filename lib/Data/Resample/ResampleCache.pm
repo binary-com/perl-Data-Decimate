@@ -17,7 +17,14 @@ extends 'Data::Resample';
 =cut
 
 sub resample_cache_backfill {
+    my ($self, $symbol, $ticks) = @_;
 
+    my $ticks_key = $self->_make_key($symbol, 0);
+    foreach my $tick (@$ticks) {
+        $self->_add($tick, $ticks_key, $fast_insert);
+    }
+
+    return;
 }
 
 =head2 resample_cache_get

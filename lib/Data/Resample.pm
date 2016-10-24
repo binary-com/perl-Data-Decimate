@@ -7,6 +7,7 @@ use 5.010;
 use Moose;
 
 use Cache::RedisDB;
+use Date::Utility;
 use Sereal::Encoder;
 use Sereal::Decoder;
 
@@ -112,6 +113,75 @@ sub _update {
     my ($redis, $key, $score, $value) = @_;
 
     return $redis->zremrangebyscore($key, $score, $score);
+}
+
+=head2 _aggregate
+
+=cut
+
+sub _aggregate {
+    my ($self, $args) = @_;
+
+    my $ul = $args->{symbol};
+    my $end = $args->{end_epoch} || time;
+
+    my $ai = 15;                          #15sec
+    my $last_agg = $end - ($end % $ai);
+
+    my ($total_added, $first_added, $last_added) = (0, 0, 0);
+    my $redis = $self->_redis;
+
+    my ($unagg_key, $agg_key) = map { $self->_make_key($ul, $_) } (0 .. 1);
+
+    my $count = 0;
+
+    if ($ticks = $args->{ticks}) {
+        my $first_tick = $ticks[0];
+        my $prev_tick  = $first_tick;
+        my $offset     = $first_tick->{epoch} % $ai;
+        my $prev_agg   = $first_tick->{epoch} - $offset;
+        shift @ticks unless $offset;    # Caught tail end of previous period.
+        my $next_agg   = $prev_agg + $ai;
+        my $tick_count = 0;
+
+        foreach my $tick (@$ticks) {
+            if ($tick->{epoch} == $next_agg) {
+                $first_added ||= $next_agg;
+                $last_added        = $next_agg;
+                $tick->{count}     = $tick_count + 1;
+                $tick->{agg_epoch} = $next_agg;
+                $total_added++;
+                _update($redis, $agg_key, $next_agg, $self->encoder->encode($tick));
+                $tick_count = 0;
+                $next_agg += $ai->seconds;
+            } elsif ($tick->{epoch} > $next_agg) {
+                $tick_count++ if $first_added;    # We count this tick, too unless we are just starting out.
+                while ($tick->{epoch} > $next_agg) {
+                    $first_added ||= $next_agg;
+                    $last_added             = $next_agg;
+                    $prev_tick->{count}     = $tick_count;
+                    $prev_tick->{agg_epoch} = $next_agg;
+                    $total_added++;
+                    _update($redis, $agg_key, $next_agg, $self->encoder->encode($prev_tick));
+                    $next_agg += $ai;
+                    $tick_count = 0;
+                    unshift @ticks, $tick if ($tick->{epoch} == $next_agg);    # Let the above code handle this.
+                }
+            } else {
+                # Skipped.
+                $tick_count++;
+            }
+
+            $prev_tick = $tick;
+        }
+
+        # While we are here, clean up any particularly old stuff
+        $redis->zremrangebyscore($unagg_key, 0, $end - $self->unagg_retention_interval->seconds);
+        $redis->zremrangebyscore($agg_key,   0, $end - $self->agg_retention_interval->seconds);
+    }
+
+    return ($total_added, Date::Utility->new($first_added), Date::Utility->new($last_added));
+
 }
 
 =head1 AUTHOR
