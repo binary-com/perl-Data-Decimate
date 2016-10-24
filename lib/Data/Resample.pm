@@ -122,8 +122,9 @@ sub _update {
 sub _aggregate {
     my ($self, $args) = @_;
 
-    my $ul = $args->{symbol};
-    my $end = $args->{end_epoch} || time;
+    my $ul    = $args->{symbol};
+    my $end   = $args->{end_epoch} || time;
+    my $ticks = $args->{ticks};
 
     my $ai = 15;                          #15sec
     my $last_agg = $end - ($end % $ai);
@@ -135,7 +136,7 @@ sub _aggregate {
 
     my $count = 0;
 
-    if (my $ticks = $args->{ticks}) {
+    if ($ticks) {
         my $first_tick = $ticks[0];
         my $prev_tick  = $first_tick;
         my $offset     = $first_tick->{epoch} % $ai;
