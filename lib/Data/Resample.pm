@@ -124,7 +124,7 @@ sub _aggregate {
 
     my $ul    = $args->{symbol};
     my $end   = $args->{end_epoch} || time;
-    my $ticks = $args->{ticks};
+    my @ticks = $args->{ticks};
 
     my $ai = 15;                          #15sec
     my $last_agg = $end - ($end % $ai);
