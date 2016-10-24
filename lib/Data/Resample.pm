@@ -109,10 +109,9 @@ sub _make_key {
 =cut 
 
 sub _update {
-    my ($redis, $key, $score, $value, $fast_insert) = @_;
+    my ($redis, $key, $score, $value) = @_;
 
-    $redis->zremrangebyscore($key, $score, $score) unless ($fast_insert);
-    return $redis->zadd($key, $score, $value);
+    return $redis->zremrangebyscore($key, $score, $score);
 }
 
 =head1 AUTHOR

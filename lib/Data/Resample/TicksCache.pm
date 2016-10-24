@@ -19,7 +19,7 @@ extends 'Data::Resample';
 =cut
 
 sub tick_cache_insert {
-    my ($self, $tick, $fast_insert) = @_;
+    my ($self, $tick) = @_;
 
     $tick = $tick->as_hash if blessed($tick);
 
@@ -28,7 +28,7 @@ sub tick_cache_insert {
     $to_store{count} = 1;    # These are all single ticks;
     my $key = $self->_make_key($to_store{symbol}, 0);
 
-    return _update($self->_redis, $key, $tick->{epoch}, $encoder->encode(\%to_store), $fast_insert);
+    return _update($self->_redis, $key, $tick->{epoch}, $encoder->encode(\%to_store));
 }
 
 =head2 tick_cache_get_num_ticks
@@ -38,14 +38,14 @@ Retrieve num number of ticks from TicksCache.
 =cut
 
 sub tick_cache_get_num_ticks {
-   
+
     my ($self, $args) = @_;
 
-    my $symbol      = $args->{symbol};
-    my $end        = $args->{end_epoch} || time;
-    my $num         = $args->{num} || 1;    
+    my $symbol = $args->{symbol};
+    my $end    = $args->{end_epoch} || time;
+    my $num    = $args->{num} || 1;
 
-    my $redis       = $self->_redis;
+    my $redis = $self->_redis;
     my @res;
 
     @res = map { $decoder->decode($_) } reverse @{$redis->zrevrangebyscore($self->_make_key($symbol, 0), $end, 0, 'LIMIT', 0, $num)};
