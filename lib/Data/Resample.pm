@@ -52,10 +52,22 @@ if you don't export anything, such as for a purely object-oriented module.
 
 =cut
 
-has sampling_frequency  => (is => 'ro');
+has sampling_frequency => (
+    is      => 'ro',
+    isa     => 'time_interval',
+    default => '15s',
+    coerce  => 1,
+);
+
 has tick_cache_size     => (is => 'ro');
 has resample_cache_size => (is => 'ro');
-has unagg_interval      => (is => 'ro');
+
+has unagg_retention_interval => (
+    is      => 'ro',
+    isa     => 'time_interval',
+    default => '31m',
+    coerce  => 1,
+);
 
 has decoder => (
     is      => 'ro',
@@ -98,9 +110,9 @@ sub _make_key {
 
     my @bits = ("AGGTICKS", $symbol);
     if ($agg) {
-        push @bits, ($self->sampling_frequency . 's', 'AGG');
+        push @bits, ($self->sampling_frequency->as_concise_string, 'AGG');
     } else {
-        push @bits, ($self->unagg_interval . 'm', 'FULL');
+        push @bits, ($self->unagg_retention_interval->as_concise_string, 'FULL');
     }
 
     return join('_', @bits);
