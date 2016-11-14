@@ -30,6 +30,7 @@ WriteMakefile(
         'List::Util'                  => 0,
         'Sereal::Encoder'             => 0,
         'Sereal::Decoder'             => 0,
+        'Time::Duration::Concise'     => 0,
     },
     dist  => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
     clean => { FILES => 'Data-Resample-*' },
