@@ -55,6 +55,7 @@ if you don't export anything, such as for a purely object-oriented module.
 has sampling_frequency  => (is => 'ro');
 has tick_cache_size     => (is => 'ro');
 has resample_cache_size => (is => 'ro');
+has unagg_interval      => (is => 'ro');
 
 has decoder => (
     is      => 'ro',
@@ -97,9 +98,9 @@ sub _make_key {
 
     my @bits = ("AGGTICKS", $symbol);
     if ($agg) {
-        push @bits, ($self->sampling_frequency, 'AGG');
+        push @bits, ($self->sampling_frequency . 's', 'AGG');
     } else {
-        push @bits, ('31m', 'FULL');
+        push @bits, ($self->unagg_interval . 'm', 'FULL');
     }
 
     return join('_', @bits);
@@ -126,7 +127,7 @@ sub _aggregate {
     my $end   = $args->{end_epoch} || time;
     my $ticks = $args->{ticks};
 
-    my $ai = 15;                          #15sec
+    my $ai = $self->sampling_frequency;    #default 15sec
     my $last_agg = $end - ($end % $ai);
 
     my ($total_added, $first_added, $last_added) = (0, 0, 0);
@@ -134,9 +135,19 @@ sub _aggregate {
 
     my ($unagg_key, $agg_key) = map { $self->_make_key($ul, $_) } (0 .. 1);
 
-    my $count = 0;
+    my $counter        = 0;
+    my $prev_agg_epoch = 0;
+    my %aggregated_data;
 
     if ($ticks) {
+        %aggregated_data = map {
+            my $agg_epoch = ($_->{epoch} % $ai) == 0 ? $_->{epoch} : $_->{epoch} - ($_->{epoch} % $ai) + $ai;
+            print "$_->{symbol} $_->{epoch} $agg_epoch $_->{bid} $_->{quote} $_->{ask} \n";
+            $counter = ($agg_epoch == $prev_agg_epoch) ? $counter + 1 : 1;
+            $_->{count} = $counter;
+            $prev_agg_epoch = $agg_epoch;
+            ($agg_epoch) => $_
+        } @$ticks;
 
         # While we are here, clean up any particularly old stuff
         $redis->zremrangebyscore($unagg_key, 0, $end - $self->unagg_retention_interval->seconds);
