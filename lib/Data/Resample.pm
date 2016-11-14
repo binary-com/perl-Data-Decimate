@@ -62,6 +62,13 @@ has sampling_frequency => (
 has tick_cache_size     => (is => 'ro');
 has resample_cache_size => (is => 'ro');
 
+has agg_retention_interval => (
+    is      => 'ro',
+    isa     => 'time_interval',
+    default => '12h',
+    coerce  => 1,
+);
+
 has unagg_retention_interval => (
     is      => 'ro',
     isa     => 'time_interval',
