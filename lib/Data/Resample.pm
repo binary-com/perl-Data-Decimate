@@ -157,7 +157,7 @@ sub _aggregate {
     my $end   = $args->{end_epoch} || time;
     my $ticks = $args->{ticks};
 
-    my $ai = $self->sampling_frequency;    #default 15sec
+    my $ai = $self->sampling_frequency->seconds;    #default 15sec
     my $last_agg = $end - ($end % $ai);
 
     my ($total_added, $first_added, $last_added) = (0, 0, 0);
