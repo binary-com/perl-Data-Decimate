@@ -160,7 +160,7 @@ sub _aggregate {
     my $ai = $self->sampling_frequency->seconds;    #default 15sec
     my $last_agg = $end - ($end % $ai);
 
-    my ($total_added, $first_added, $last_added) = (0, 0, 0);
+    my ($first_added, $last_added) = (0, 0);
     my $redis = $self->_redis;
 
     my ($unagg_key, $agg_key) = map { $self->_make_key($ul, $_) } (0 .. 1);
