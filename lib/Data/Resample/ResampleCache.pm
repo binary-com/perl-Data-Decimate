@@ -44,18 +44,14 @@ sub resample_cache_get {
     my $start = $args->{start_epoch};
     my $end   = $args->{end_epoch} || time;
 
-    my $ti = 31;
-
+    my $ti    = $self->agg_retention_interval;
     my $redis = $self->_redis;
 
     my @res;
 
-    my ($hold_secs, $key);
-
-    $hold_secs = 0;                       #agg retention interval, sec;
     $key = $self->_make_key($which, 1);
 
-    my $start = $end - min($ti->seconds, $hold_secs);
+    my $start = $end - $ti->seconds;
 
     @res = map { $self->decoder->decode($_) } @{$redis->zrangebyscore($key, $start, $end)};
 
