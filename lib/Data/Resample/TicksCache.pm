@@ -31,9 +31,9 @@ sub tick_cache_insert {
     return _update($self->_redis, $key, $tick->{epoch}, $self->encoder->encode(\%to_store));
 }
 
-tick_cache_get(symbol, startepoch, endepoch) = head2 tick_cache_get
+=head2 tick_cache_get
 
-    Retrieve ticks from start epoch till end opech .
+Retrieve ticks from start epoch till end opech .
 
 =cut
 
@@ -43,9 +43,13 @@ sub tick_cache_get {
     my $start  = $args->{start_epoch} || 0;
     my $end    = $args->{end_epoch} || time;
 
-    my $num = $end-$start;
+    my $num = $end - $start;
 
-    return tick_cache_get_num_ticks({symbol=>$symbol, end_epoch=>$end, num=>$num, });
+    return tick_cache_get_num_ticks({
+        symbol    => $symbol,
+        end_epoch => $end,
+        num       => $num,
+    });
 }
 
 =head2 tick_cache_get_num_ticks
@@ -54,7 +58,7 @@ Retrieve num number of ticks from TicksCache.
 
 =cut
 
-    sub tick_cache_get_num_ticks {
+sub tick_cache_get_num_ticks {
 
     my ($self, $args) = @_;
 
