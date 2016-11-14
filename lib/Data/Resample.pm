@@ -143,7 +143,8 @@ sub _make_key {
 sub _update {
     my ($redis, $key, $score, $value) = @_;
 
-    return $redis->zremrangebyscore($key, $score, $score);
+    $redis->zremrangebyscore($key, $score, $score);
+    return $redis->zadd($key, $score, $value);
 }
 
 =head2 _aggregate
