@@ -33,6 +33,22 @@ sub tick_cache_insert {
     return _update($self->_redis, $key, $tick->{epoch}, $self->encoder->encode(\%to_store));
 }
 
+=head2 tick_cache_bulk_insert
+
+=cut
+
+sub tick_cache_bulk_insert {
+    my ($self, $ticks) = @_;
+
+    if ($ticks) {
+        foreach my $tick (@$ticks) {
+            $self->tick_cache_insert($tick);
+        }
+    }
+
+    return;
+}
+
 =head2 tick_cache_get
 
 Retrieve ticks from start epoch till end opech .
