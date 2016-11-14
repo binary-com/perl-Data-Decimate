@@ -11,6 +11,17 @@ use Date::Utility;
 use Sereal::Encoder;
 use Sereal::Decoder;
 
+use MooseX::Types::Moose qw(Int Num Str);
+use MooseX::Types -declare => [qw(
+        time_interval
+        )];
+
+use Moose::Util::TypeConstraints;
+use Time::Duration::Concise;
+
+subtype 'time_interval', as 'Time::Duration::Concise';
+coerce 'time_interval', from 'Str', via { Time::Duration::Concise->new(interval => $_) };
+
 =head1 NAME
 
 Data::Resample 
@@ -56,7 +67,6 @@ has sampling_frequency => (
     is      => 'ro',
     isa     => 'time_interval',
     default => '15s',
-    coerce  => 1,
 );
 
 has tick_cache_size     => (is => 'ro');
@@ -66,14 +76,12 @@ has agg_retention_interval => (
     is      => 'ro',
     isa     => 'time_interval',
     default => '12h',
-    coerce  => 1,
 );
 
 has unagg_retention_interval => (
     is      => 'ro',
     isa     => 'time_interval',
     default => '31m',
-    coerce  => 1,
 );
 
 has decoder => (
