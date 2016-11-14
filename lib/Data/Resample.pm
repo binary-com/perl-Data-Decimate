@@ -154,7 +154,9 @@ sub _aggregate {
         $redis->zremrangebyscore($agg_key,   0, $end - $self->agg_retention_interval->seconds);
     }
 
-    return ($total_added, Date::Utility->new($first_added), Date::Utility->new($last_added));
+    my @sorted_agg = sort { $a <=> $b } keys %aggregated_data;
+
+    return (\@sorted_agg, Date::Utility->new($first_added), Date::Utility->new($last_added));
 
 }
 
