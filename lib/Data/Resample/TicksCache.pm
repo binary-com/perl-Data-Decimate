@@ -16,6 +16,8 @@ extends 'Data::Resample';
 
 =head2 tick_cache_insert
 
+Also insert into resample cache if tick crosses 15s boundary.
+
 =cut
 
 sub tick_cache_insert {
