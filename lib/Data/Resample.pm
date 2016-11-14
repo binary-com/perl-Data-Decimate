@@ -67,6 +67,7 @@ has sampling_frequency => (
     is      => 'ro',
     isa     => 'time_interval',
     default => '15s',
+    coerce  => 1,
 );
 
 has tick_cache_size     => (is => 'ro');
@@ -76,12 +77,14 @@ has agg_retention_interval => (
     is      => 'ro',
     isa     => 'time_interval',
     default => '12h',
+    coerce  => 1,
 );
 
 has unagg_retention_interval => (
     is      => 'ro',
     isa     => 'time_interval',
     default => '31m',
+    coerce  => 1,
 );
 
 has decoder => (
