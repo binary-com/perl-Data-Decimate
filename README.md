@@ -5,7 +5,7 @@ Data::Resample
 
 A module that allows you to resample a data feed
 
-sampling_frequency=15
+sampling_frequency = 15
 tick_cache_size = 30*60
 resample_cache_size = 12*60*60
 redis=xxxx
