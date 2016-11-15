@@ -65,24 +65,6 @@ A module that allows you to resample a data feed
 
 our $VERSION = '0.01';
 
-=head1 SYNOPSIS
-
-Quick summary of what the module does.
-
-Perhaps a little code snippet.
-
-    use Data::Resample;
-
-    my $foo = Data::Resample->new();
-    ...
-
-=head1 EXPORT
-
-A list of functions that can be exported.  You can delete this section
-if you don't export anything, such as for a purely object-oriented module.
-
-=cut
-
 =head1 ATTRIBUTES
 =cut
 
