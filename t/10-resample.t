@@ -25,4 +25,8 @@ $ENV{REDIS_CACHE_SERVER} = '127.0.0.1:' . $server->port;
 
 ok $server, "test redis server object instance has been created";
 
+my $redis = Cache::RedisDB->redis;
+
+ok $redis, "test redis connection";
+
 done_testing;
