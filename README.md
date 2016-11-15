@@ -1,14 +1,11 @@
 # perl-Data-Resample
 
-
-Data::Resample
-
 A module that allows you to resample a data feed
 
 #### SYNOPSIS
 
 ```
-use Data::Resample::TicksCache;
+  use Data::Resample::TicksCache;
   use Data::Resample::ResampleCache;
 
   my $ticks_cache = Data::Resample::TicksCache->new({
