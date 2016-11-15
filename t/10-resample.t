@@ -46,7 +46,7 @@ subtest "ticks_cache_insert" => sub {
         symbol => 'USDJPY',
     });
 
-    ok scalar(@$ticks), 1;
+    is scalar(@$ticks), '1', "retrieved one tick";
 
 };
 
