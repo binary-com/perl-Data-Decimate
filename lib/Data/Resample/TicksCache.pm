@@ -39,13 +39,15 @@ sub tick_cache_insert {
     my $boundary = $current_epoch - ($current_epoch % $self->sampling_frequency->seconds);
 
     if ($current_epoch > $boundary and $prev_added_epoch <= $boundary) {
-        if (my @ticks = map { $decoder->decode($_) } @{$redis->zrangebyscore($key, $boundary - $self->sampling_frequency->seconds - 1, $boundary)}) {
+        if (my @ticks =
+            map { $self->decoder->decode($_) } @{$self->_redis->zrangebyscore($key, $boundary - $self->sampling_frequency->seconds - 1, $boundary)})
+        {
 
             #do aggregation
             $self->_aggregate({
                 symbol    => $to_store{symbol},
                 end_epoch => $boundary,
-                ticks     => $ticks,
+                ticks     => \@ticks,
             });
         }
     }
