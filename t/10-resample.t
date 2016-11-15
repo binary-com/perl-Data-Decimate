@@ -45,7 +45,7 @@ subtest "ticks_cache_insert" => sub {
     );
 
     $ticks_cache->tick_cache_insert({
-        tick   => \%tick,
+        tick   => $tick,
     });
 
 };
