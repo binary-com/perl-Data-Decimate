@@ -39,7 +39,8 @@ sub tick_cache_insert {
     my $boundary = $current_epoch - ($current_epoch % $self->sampling_frequency->seconds);
 
     if ($current_epoch > $boundary and $prev_added_epoch <= $boundary) {
-        if (my @ticks =
+        if (
+            my @ticks =
             map { $self->decoder->decode($_) } @{$self->_redis->zrangebyscore($key, $boundary - $self->sampling_frequency->seconds - 1, $boundary)})
         {
 
@@ -54,7 +55,7 @@ sub tick_cache_insert {
 
     $prev_added_epoch{$to_store{symbol}} = $current_epoch;
 
-    return _update($self->_redis, $key, $tick->{epoch}, $self->encoder->encode(\%to_store));
+    return $self->_update($self->_redis, $key, $tick->{epoch}, $self->encoder->encode(\%to_store));
 }
 
 =head2 tick_cache_get
