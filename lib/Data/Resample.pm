@@ -141,7 +141,7 @@ sub _make_key {
 =cut 
 
 sub _update {
-    my ($redis, $key, $score, $value) = @_;
+    my ($self, $redis, $key, $score, $value) = @_;
 
     $redis->zremrangebyscore($key, $score, $score);
     return $redis->zadd($key, $score, $value);
