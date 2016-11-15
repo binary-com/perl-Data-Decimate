@@ -19,4 +19,10 @@ my $server = Test::TCP->new(
             conf       => {port => $port},
             tmpdir     => $tmp_dir,
         )->exec;
-    });
+   });
+
+$ENV{REDIS_CACHE_SERVER} = '127.0.0.1:' . $server->port;
+
+ok $server, "test redis server object instance has been created";
+
+done_testing;
