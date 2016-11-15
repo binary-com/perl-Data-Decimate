@@ -12,6 +12,8 @@ use Sereal::Decoder;
 
 extends 'Data::Resample';
 
+my %last_added_epoch;
+
 =head1 SUBROUTINES/METHODS
 
 =head2 tick_cache_insert
