@@ -27,7 +27,6 @@ sub resample_cache_backfill {
 
     return $self->_aggregate({
         symbol    => $symbol,
-        end_epoch => $end,
         ticks     => $ticks,
     });
 
