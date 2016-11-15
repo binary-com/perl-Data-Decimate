@@ -66,6 +66,4 @@ subtest "resample_cache" => sub {
     ok $resample_cache, "ResampleCache instance has been created";
 };
 
-$server->stop;
-
 done_testing;
