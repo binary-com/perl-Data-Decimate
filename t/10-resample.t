@@ -27,7 +27,7 @@ $ENV{REDIS_CACHE_SERVER} = '127.0.0.1:' . $server->port;
 
 ok $server, "test redis server object instance has been created";
 
-subtest "ticks_cache_insert" => sub {
+subtest "ticks_cache_insert_and_retrieve" => sub {
     my $ticks_cache = Data::Resample::TicksCache->new;
 
     ok $ticks_cache, "TicksCache instance has been created";
@@ -48,6 +48,12 @@ subtest "ticks_cache_insert" => sub {
 
     is scalar(@$ticks), '1', "retrieved one tick";
 
+};
+
+subtest "resample_cache" => sub {
+    my $resample_cache = Data::Resample::ResampleCache->new;
+
+    ok $resample_cache, "ResampleCache instance has been created";
 };
 
 $server->stop;
