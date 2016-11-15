@@ -12,7 +12,7 @@ use Sereal::Decoder;
 
 extends 'Data::Resample';
 
-my %last_added_epoch;
+my %prev_added_epoch;
 
 =head1 SUBROUTINES/METHODS
 
@@ -31,6 +31,26 @@ sub tick_cache_insert {
 
     $to_store{count} = 1;    # These are all single ticks;
     my $key = $self->_make_key($to_store{symbol}, 0);
+
+    # check for aggregation interval boundary.
+    my $current_epoch = $tick->{epoch};
+    my $prev_added_epoch = $prev_added_epoch{$to_store{symbol}} || $current_epoch;
+
+    my $boundary = $current_epoch - ($current_epoch % $self->sampling_frequency->seconds);
+
+    if ($current_epoch > $boundary and $prev_added_epoch <= $boundary) {
+        if (my @ticks = map { $decoder->decode($_) } @{$redis->zrangebyscore($key, $boundary - $self->sampling_frequency->seconds - 1, $boundary)}) {
+
+            #do aggregation
+            $self->_aggregate({
+                symbol    => $to_store{symbol},
+                end_epoch => $boundary,
+                ticks     => $ticks,
+            });
+        }
+    }
+
+    $prev_added_epoch{$to_store{symbol}} = $current_epoch;
 
     return _update($self->_redis, $key, $tick->{epoch}, $self->encoder->encode(\%to_store));
 }

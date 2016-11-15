@@ -159,7 +159,6 @@ sub _aggregate {
     my $ticks = $args->{ticks};
 
     my $ai = $self->sampling_frequency->seconds;    #default 15sec
-    my $last_agg = $end - ($end % $ai);
 
     my ($first_added, $last_added) = (0, 0);
     my $redis = $self->_redis;
@@ -173,7 +172,7 @@ sub _aggregate {
     if ($ticks) {
         %aggregated_data = map {
             my $agg_epoch = ($_->{epoch} % $ai) == 0 ? $_->{epoch} : $_->{epoch} - ($_->{epoch} % $ai) + $ai;
-            print "$_->{symbol} $_->{epoch} $agg_epoch $_->{bid} $_->{quote} $_->{ask} \n";
+            #print "$_->{symbol} $_->{epoch} $agg_epoch $_->{bid} $_->{quote} $_->{ask} \n";
             $counter = ($agg_epoch == $prev_agg_epoch) ? $counter + 1 : 1;
             $_->{count} = $counter;
             $prev_agg_epoch = $agg_epoch;
