@@ -152,7 +152,7 @@ sub _aggregate {
     my ($self, $args) = @_;
 
     my $ul    = $args->{symbol};
-    my $end   = $args->{end_epoch} || time;
+    my $end   = $args->{end_epoch} // time;
     my $ticks = $args->{ticks};
 
     my $ai = $self->sampling_frequency->seconds;    #default 15sec

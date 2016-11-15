@@ -34,7 +34,7 @@ sub tick_cache_insert {
 
     # check for aggregation interval boundary.
     my $current_epoch = $tick->{epoch};
-    my $prev_added_epoch = $prev_added_epoch{$to_store{symbol}} || $current_epoch;
+    my $prev_added_epoch = $prev_added_epoch{$to_store{symbol}} // $current_epoch;
 
     my $boundary = $current_epoch - ($current_epoch % $self->sampling_frequency->seconds);
 
@@ -67,8 +67,8 @@ Retrieve ticks from start epoch till end opech .
 sub tick_cache_get {
     my ($self, $args) = @_;
     my $symbol = $args->{symbol};
-    my $start  = $args->{start_epoch} || 0;
-    my $end    = $args->{end_epoch} || time;
+    my $start  = $args->{start_epoch} // 0;
+    my $end    = $args->{end_epoch} // time;
 
     my $num = $end - $start;
 
@@ -90,8 +90,8 @@ sub tick_cache_get_num_ticks {
     my ($self, $args) = @_;
 
     my $symbol = $args->{symbol};
-    my $end    = $args->{end_epoch} || time;
-    my $num    = $args->{num} || 1;
+    my $end    = $args->{end_epoch} // time;
+    my $num    = $args->{num} // 1;
 
     my $redis = $self->redis;
     my @res;

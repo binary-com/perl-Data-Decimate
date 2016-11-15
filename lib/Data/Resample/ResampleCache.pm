@@ -19,9 +19,10 @@ extends 'Data::Resample';
 sub resample_cache_backfill {
     my ($self, $symbol, $ticks) = @_;
 
-    my $ticks_key = $self->_make_key($symbol, 0);
+    my $key = $self->_make_key($symbol, 0);
+
     foreach my $tick (@$ticks) {
-        $self->_add($tick, $ticks_key, $fast_insert);
+        $self->_update($self->redis, $key, $tick->{epoch}, $self->encoder->encode($tick));
     }
 
     return $self->_aggregate({
@@ -42,16 +43,14 @@ sub resample_cache_get {
 
     my $which = $args->{symbol};
     my $start = $args->{start_epoch};
-    my $end   = $args->{end_epoch} || time;
+    my $end   = $args->{end_epoch} // time;
 
     my $ti    = $self->agg_retention_interval;
     my $redis = $self->redis;
 
     my @res;
 
-    $key = $self->_make_key($which, 1);
-
-    my $start = $end - $ti->seconds;
+    my $key = $self->_make_key($which, 1);
 
     @res = map { $self->decoder->decode($_) } @{$redis->zrangebyscore($key, $start, $end)};
 
