@@ -13,7 +13,7 @@ before_install:
     - perl -V
     - "cpanm -n Moose"
     - "cpanm -n List::Util"
-    - "cpanm -n Cache::RedisDB"
+    - "cpanm -n RedisDB"
     - "cpanm -n Date::Utility"
     - "cpanm -n Scalar::Util"
     - "cpanm -n Sereal::Encoder"
@@ -22,4 +22,4 @@ before_install:
     - "cpanm -n MooseX::Types::Moose"
     - "cpanm -n Test::RedisServer"
 script:
-  perl Makefile.PL && RELEASE_TESTING=1 make test
+  perl Makefile.PL && make test

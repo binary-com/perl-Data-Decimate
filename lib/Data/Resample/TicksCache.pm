@@ -41,7 +41,7 @@ sub tick_cache_insert {
     if ($current_epoch > $boundary and $prev_added_epoch <= $boundary) {
         if (
             my @ticks =
-            map { $self->decoder->decode($_) } @{$self->_redis->zrangebyscore($key, $boundary - $self->sampling_frequency->seconds - 1, $boundary)})
+            map { $self->decoder->decode($_) } @{$self->redis->zrangebyscore($key, $boundary - $self->sampling_frequency->seconds - 1, $boundary)})
         {
 
             #do aggregation
@@ -55,7 +55,7 @@ sub tick_cache_insert {
 
     $prev_added_epoch{$to_store{symbol}} = $current_epoch;
 
-    return $self->_update($self->_redis, $key, $tick->{epoch}, $self->encoder->encode(\%to_store));
+    return $self->_update($self->redis, $key, $tick->{epoch}, $self->encoder->encode(\%to_store));
 }
 
 =head2 tick_cache_get
@@ -93,7 +93,7 @@ sub tick_cache_get_num_ticks {
     my $end    = $args->{end_epoch} || time;
     my $num    = $args->{num} || 1;
 
-    my $redis = $self->_redis;
+    my $redis = $self->redis;
     my @res;
 
     @res = map { $self->decoder->decode($_) } reverse @{$redis->zrevrangebyscore($self->_make_key($symbol, 0), $end, 0, 'LIMIT', 0, $num)};

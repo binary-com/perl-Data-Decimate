@@ -6,7 +6,7 @@ use warnings;
 use 5.010;
 use Moose;
 
-use Cache::RedisDB;
+use RedisDB;
 use Date::Utility;
 use Sereal::Encoder;
 use Sereal::Decoder;
@@ -109,15 +109,12 @@ sub _build_encoder {
     });
 }
 
+has 'redis' => (
+    is       => 'ro',
+    required => 1
+);
+
 =head1 SUBROUTINES/METHODS
-
-=head2 _redis
-
-=cut
-
-sub _redis {
-    return Cache::RedisDB->redis;
-}
 
 =head2 _make_key
 
@@ -161,7 +158,7 @@ sub _aggregate {
     my $ai = $self->sampling_frequency->seconds;    #default 15sec
 
     my ($first_added, $last_added) = (0, 0);
-    my $redis = $self->_redis;
+    my $redis = $self->redis;
 
     my ($unagg_key, $agg_key) = map { $self->_make_key($ul, $_) } (0 .. 1);
 
