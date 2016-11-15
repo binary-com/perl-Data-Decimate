@@ -9,6 +9,8 @@ use Test::RedisServer;
 use Test::TCP;
 use Test::FailWarnings;
 
+use Data::Resample::TicksCache;
+
 my $tmp_dir = Path::Tiny->tempdir(CLEANUP => 1);
 
 my $server = Test::TCP->new(
@@ -28,5 +30,13 @@ ok $server, "test redis server object instance has been created";
 my $redis = Cache::RedisDB->redis;
 
 ok $redis, "test redis connection";
+
+subtest "ticks_cache_insert" => sub {
+	my $ticks_cache = Data::Resample::TicksCache->new;
+
+        ok $ticks_cache, "TicksCache instance has been created";
+
+
+};
 
 done_testing;
