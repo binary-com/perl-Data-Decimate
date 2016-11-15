@@ -30,6 +30,37 @@ Data::Resample
 
 Version 0.01
 
+=head1 SYNOPSIS
+
+  use Data::Resample::TicksCache;
+  use Data::Resample::ResampleCache;
+
+  my $ticks_cache = Data::Resample::TicksCache->new({
+        redis => $redis,
+        });
+
+  my %tick = (
+        symbol => 'USDJPY',
+        epoch  => time,
+        quote  => 103.0,
+        bid    => 103.0,
+        ask    => 103.0,
+  );
+
+  $ticks_cache->tick_cache_insert(\%tick);
+
+  my $ticks = $ticks_cache->tick_cache_get_num_ticks({
+        symbol => 'USDJPY',
+        });
+
+  my $resample_cache = Data::Resample::ResampleCache->new({
+        redis => $redis,
+        });
+
+=head1 DESCRIPTION
+
+A module that allows you to resample a data feed
+
 =cut
 
 our $VERSION = '0.01';

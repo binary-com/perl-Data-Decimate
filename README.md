@@ -5,24 +5,35 @@ Data::Resample
 
 A module that allows you to resample a data feed
 
-sampling_frequency = 15
+#### SYNOPSIS
 
-tick_cache_size = 30*60
+```
+use Data::Resample::TicksCache;
+  use Data::Resample::ResampleCache;
 
-resample_cache_size = 12*60*60
+  my $ticks_cache = Data::Resample::TicksCache->new({
+        redis => $redis,
+        });
 
-redis=xxxx
+  my %tick = (
+        symbol => 'USDJPY',
+        epoch  => time,
+        quote  => 103.0,
+        bid    => 103.0,
+        ask    => 103.0,
+  );
 
-1) Data::Resample::TcksCache : Cache of all ticks in last tick_cache_size seconds
+  $ticks_cache->tick_cache_insert(\%tick);
 
-  * tick_cache_insert(symbol,epoch, value)     WILL ALSO INSERT INTO RESAMPLE CACHE IF THE TICK CROSSES THE 15s BOUNDARY
-  * tick_cache_get(symbol,startepoch,endepoch)    
-  * tick_cache_get_num_ticks(symbol,endepoch,num)  
+  my $ticks = $ticks_cache->tick_cache_get_num_ticks({
+        symbol => 'USDJPY',
+        });
 
-2) Data::Resample::ResampleCache
+  my $resample_cache = Data::Resample::ResampleCache->new({
+        redis => $redis,
+        });
 
-  * resample_cache_backfill(symbol, @ticks)
-  * resample_cache_get(symbol,startepoch,endepoch) 
+```
 
 #### INSTALLATION
 
