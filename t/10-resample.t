@@ -80,6 +80,18 @@ subtest "ticks_cache_insert_and_retrieve" => sub {
     });
 
     is scalar(@$resample_tick), '1', "retrieved 1 resample tick";
+
+#now let's try insert the rest of the ticks data
+    for (my $i = 17; $i <= 141; $i++) {
+        $ticks_cache->tick_cache_insert($ticks->[$i]);
+    }
+
+    my $tick3 = $ticks_cache->tick_cache_get_num_ticks({
+        symbol => 'USDJPY',
+        num    => 142,
+    });
+
+    is scalar(@$tick3), '142', "retrieved 142 ticks";
 };
 
 sub ticks_from_csv {
