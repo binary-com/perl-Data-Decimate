@@ -42,7 +42,7 @@ sub resample_cache_get {
     my ($self, $args) = @_;
 
     my $which = $args->{symbol};
-    my $start = $args->{start_epoch};
+    my $start = $args->{start_epoch} // 0;
     my $end   = $args->{end_epoch} // time;
 
     my $ti    = $self->agg_retention_interval;
