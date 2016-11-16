@@ -100,4 +100,6 @@ sub ticks_from_csv {
     return \@ticks;
 }
 
+kill 9, $server->pid;
+
 done_testing;
