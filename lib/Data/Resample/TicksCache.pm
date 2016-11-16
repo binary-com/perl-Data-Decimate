@@ -45,7 +45,7 @@ sub tick_cache_insert {
         {
 
             #do aggregation
-            $self->_aggregate({
+            my $agg = $self->_aggregate({
                 symbol    => $to_store{symbol},
                 end_epoch => $boundary,
                 ticks     => \@ticks,

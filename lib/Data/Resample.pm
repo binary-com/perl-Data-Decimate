@@ -196,6 +196,11 @@ sub _aggregate {
 
     my @sorted_agg = sort { $a <=> $b } keys %aggregated_data;
 
+    foreach my $key (@sorted_agg) {
+        my $tick = $aggregated_data{$key};
+        $self->_update($self->redis, $agg_key, $key, $self->encoder->encode($tick));
+    }
+
     return (\@sorted_agg, Date::Utility->new($first_added), Date::Utility->new($last_added));
 
 }
