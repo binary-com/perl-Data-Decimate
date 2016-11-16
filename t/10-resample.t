@@ -46,11 +46,11 @@ subtest "ticks_cache_insert_and_retrieve" => sub {
 
     $ticks_cache->tick_cache_insert($first_tick);
 
-    my $ticks = $ticks_cache->tick_cache_get_num_ticks({
+    my $tick = $ticks_cache->tick_cache_get_num_ticks({
         symbol => 'USDJPY',
     });
 
-    is scalar(@$ticks), '1', "retrieved one tick";
+    is scalar(@$tick), '1', "retrieved one tick";
 
 };
 
