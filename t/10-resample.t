@@ -41,7 +41,7 @@ subtest "ticks_cache_insert_and_retrieve" => sub {
 
     ok $ticks_cache, "TicksCache instance has been created";
 
-    my $ticks = ticks_from_csv();
+    my $ticks      = ticks_from_csv();
     my $first_tick = $ticks->[0];
 
     $ticks_cache->tick_cache_insert($first_tick);
@@ -54,8 +54,19 @@ subtest "ticks_cache_insert_and_retrieve" => sub {
 
 #USDJPY,1479203101,1479203115,108.26,108.263,108.265
     is $tick->[0]->{epoch}, '1479203101', "epoch is correct";
-};
 
+#test for ticks insertion that cross 15s boundary
+    for (my $i = 1; $i <= 16; $i++) {
+        $ticks_cache->tick_cache_insert($ticks->[i]);
+    }
+
+    my $tick2 = $ticks_cache->tick_cache_get_num_ticks({
+        symbol => 'USDJPY',
+        num    => 17,
+    });
+
+    is scalar(@$tick2), '17', "retrieved 17 ticks";
+};
 
 sub ticks_from_csv {
     my $filename = 't/tickdata.csv';
