@@ -17,7 +17,10 @@ extends 'Data::Resample';
 =cut
 
 sub resample_cache_backfill {
-    my ($self, $symbol, $ticks) = @_;
+    my ($self, $args) = @_;
+
+    my $symbol = $args->{symbol};
+    my $ticks = $args->{ticks} // [];
 
     my $key = $self->_make_key($symbol, 0);
 
@@ -26,11 +29,9 @@ sub resample_cache_backfill {
     }
 
     return $self->_aggregate({
-        symbol    => $symbol,
-        ticks     => $ticks,
+        symbol => $symbol,
+        ticks  => $ticks,
     });
-
-    return;
 }
 
 =head2 resample_cache_get

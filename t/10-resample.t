@@ -34,6 +34,8 @@ my $redis = RedisDB->new(
 
 ok $redis, "redisdb object instance has been created";
 
+my $ticks = ticks_from_csv();
+
 subtest "ticks_cache_insert_and_retrieve" => sub {
     my $ticks_cache = Data::Resample::TicksCache->new({
         redis => $redis,
@@ -41,7 +43,6 @@ subtest "ticks_cache_insert_and_retrieve" => sub {
 
     ok $ticks_cache, "TicksCache instance has been created";
 
-    my $ticks      = ticks_from_csv();
     my $first_tick = $ticks->[0];
 
     $ticks_cache->tick_cache_insert($first_tick);
@@ -73,6 +74,7 @@ subtest "ticks_cache_insert_and_retrieve" => sub {
     my $resample_cache = Data::Resample::ResampleCache->new({
         redis => $redis,
     });
+
     my $resample_tick = $resample_cache->resample_cache_get({
         symbol      => 'USDJPY',
         start_epoch => 1479203101,
@@ -103,6 +105,33 @@ subtest "ticks_cache_insert_and_retrieve" => sub {
     });
 
     is scalar(@$resample_tick), '9', "retrieved 9 resample ticks";
+};
+
+subtest "backfill_test" => sub {
+
+    my $resample_cache = Data::Resample::ResampleCache->new({
+        redis => $redis,
+    });
+
+    ok $resample_cache, "ResampleCache instance has been created";
+
+    my ($unagg_key, $agg_key) = map { $resample_cache->_make_key('USDJPY', $_) } (0 .. 1);
+
+    $redis->zremrangebyscore($unagg_key, 0, 1479203250);
+    $redis->zremrangebyscore($agg_key,   0, 1479203250);
+
+    $resample_cache->resample_cache_backfill({
+        symbol => 'USDJPY',
+        ticks  => $ticks,
+    });
+
+    my $resample_tick = $resample_cache->resample_cache_get({
+        symbol      => 'USDJPY',
+        start_epoch => 1479203101,
+        end_epoch   => 1479203250,
+    });
+
+    is scalar(@$resample_tick), '10', "retrieved 10 resample ticks";
 };
 
 sub ticks_from_csv {
