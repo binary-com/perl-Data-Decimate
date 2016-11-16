@@ -19,15 +19,13 @@ my $server = Test::TCP->new(
     code => sub {
         my $port = shift;
         Test::RedisServer->new(
-            auto_start => 0,
+            auto_start => 1,
             conf       => {port => $port},
             tmpdir     => $tmp_dir,
         )->exec;
     });
 
 ok $server, "test redis server object instance has been created";
-
-$server->start;
 
 my $redis = RedisDB->new(
     host => 'localhost',
@@ -103,6 +101,6 @@ sub ticks_from_csv {
 }
 
 #kill 9, $server->pid;
-$server->stop;
+#$server->stop;
 
 done_testing;
