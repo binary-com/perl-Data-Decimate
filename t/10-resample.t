@@ -41,15 +41,10 @@ subtest "ticks_cache_insert_and_retrieve" => sub {
 
     ok $ticks_cache, "TicksCache instance has been created";
 
-    my %tick = (
-        symbol => 'USDJPY',
-        epoch  => time,
-        quote  => 103.0,
-        bid    => 103.0,
-        ask    => 103.0,
-    );
+    my $ticks = ticks_from_csv();
+    my $first_tick = $ticks->[0];
 
-    $ticks_cache->tick_cache_insert(\%tick);
+    $ticks_cache->tick_cache_insert($first_tick);
 
     my $ticks = $ticks_cache->tick_cache_get_num_ticks({
         symbol => 'USDJPY',
