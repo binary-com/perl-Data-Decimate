@@ -52,15 +52,10 @@ subtest "ticks_cache_insert_and_retrieve" => sub {
 
     is scalar(@$tick), '1', "retrieved one tick";
 
+#USDJPY,1479203101,1479203115,108.26,108.263,108.265
+    is $tick->[0]->{epoch}, '1479203101', "epoch is correct";
 };
 
-subtest "resample_cache" => sub {
-    my $resample_cache = Data::Resample::ResampleCache->new({
-        redis => $redis,
-    });
-
-    ok $resample_cache, "ResampleCache instance has been created";
-};
 
 sub ticks_from_csv {
     my $filename = 't/tickdata.csv';
