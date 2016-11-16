@@ -19,18 +19,22 @@ extends 'Data::Resample';
 sub resample_cache_backfill {
     my ($self, $args) = @_;
 
-    my $symbol = $args->{symbol};
-    my $ticks = $args->{ticks} // [];
+    my $symbol   = $args->{symbol};
+    my $ticks    = $args->{ticks} // [];
+    my $backtest = $args->{backtest} // 0;
 
     my $key = $self->_make_key($symbol, 0);
 
-    foreach my $tick (@$ticks) {
-        $self->_update($self->redis, $key, $tick->{epoch}, $self->encoder->encode($tick));
+    if (not $backtest) {
+        foreach my $tick (@$ticks) {
+            $self->_update($self->redis, $key, $tick->{epoch}, $self->encoder->encode($tick));
+        }
     }
 
     return $self->_aggregate({
-        symbol => $symbol,
-        ticks  => $ticks,
+        symbol   => $symbol,
+        ticks    => $ticks,
+        backtest => $backtest,
     });
 }
 

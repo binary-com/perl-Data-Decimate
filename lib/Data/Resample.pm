@@ -164,9 +164,10 @@ sub _update {
 sub _aggregate {
     my ($self, $args) = @_;
 
-    my $ul    = $args->{symbol};
-    my $end   = $args->{end_epoch} // time;
-    my $ticks = $args->{ticks};
+    my $ul       = $args->{symbol};
+    my $end      = $args->{end_epoch} // time;
+    my $ticks    = $args->{ticks};
+    my $backtest = $args->{backtest} // 0;
 
     my $ai = $self->sampling_frequency->seconds;    #default 15sec
 
@@ -182,7 +183,6 @@ sub _aggregate {
     if ($ticks) {
         %aggregated_data = map {
             my $agg_epoch = ($_->{epoch} % $ai) == 0 ? $_->{epoch} : $_->{epoch} - ($_->{epoch} % $ai) + $ai;
-            #print "$_->{symbol} $_->{epoch} $agg_epoch $_->{bid} $_->{quote} $_->{ask} \n";
             $counter = ($agg_epoch == $prev_agg_epoch) ? $counter + 1 : 1;
             $_->{count} = $counter;
             $prev_agg_epoch = $agg_epoch;
