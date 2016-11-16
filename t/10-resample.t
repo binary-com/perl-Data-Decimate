@@ -66,6 +66,20 @@ subtest "ticks_cache_insert_and_retrieve" => sub {
     });
 
     is scalar(@$tick2), '17', "retrieved 17 ticks";
+
+#now, try to retrieve our first resample tick
+#last inserted tick
+#USDJPY,1479203118,1479203130,108.29,108.291,108.291
+    my $resample_cache = Data::Resample::ResampleCache->new({
+        redis => $redis,
+    });
+    my $resample_tick = $resample_cache->resample_cache_get({
+        symbol      => 'USDJPY',
+        start_epoch => 1479203101,
+        end_epoch   => 1479203118,
+    });
+
+    is scalar(@$resample_tick), '1', "retrieved 1 resample tick";
 };
 
 sub ticks_from_csv {
