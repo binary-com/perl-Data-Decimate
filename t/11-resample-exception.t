@@ -69,7 +69,7 @@ subtest "missing_ticks" => sub {
         end_epoch   => 1479203250,
     });
 
-    is scalar(@$resample_tick), '9', "retrieved 9 resample ticks";
+    is scalar(@$resample_tick), '8', "retrieved 8 resample ticks";
 
 };
 
