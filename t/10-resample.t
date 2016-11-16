@@ -57,7 +57,7 @@ subtest "ticks_cache_insert_and_retrieve" => sub {
 
 #test for ticks insertion that cross 15s boundary
     for (my $i = 1; $i <= 16; $i++) {
-        $ticks_cache->tick_cache_insert($ticks->[i]);
+        $ticks_cache->tick_cache_insert($ticks->[$i]);
     }
 
     my $tick2 = $ticks_cache->tick_cache_get_num_ticks({
