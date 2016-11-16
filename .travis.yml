@@ -22,5 +22,6 @@ before_install:
     - "cpanm -n Time::Duration::Concise"
     - "cpanm -n MooseX::Types::Moose"
     - "cpanm -n Test::RedisServer"
+    - "cpanm -n Text::CSV"
 script:
     - "perl Makefile.PL && make test"

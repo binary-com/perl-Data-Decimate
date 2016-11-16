@@ -22,9 +22,12 @@ WriteMakefile(
         'Moose'              => 0,
         'Moose::Util::TypeConstraints'   => 0,
         'Test::Perl::Critic' => 0,
+        'Text::CSV'          => 0,
+        'Test::RedisServer'  => 0,
+        'Path::Tiny'         => 0,
     },
     PREREQ_PM => {
-        'Cache::RedisDB'              => 0,
+        'RedisDB'              => 0,
         'Date::Utility'               => 0,
         'Scalar::Util'                => 0,
         'List::Util'                  => 0,
