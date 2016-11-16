@@ -169,9 +169,7 @@ sub _aggregate {
     my $ticks    = $args->{ticks};
     my $backtest = $args->{backtest} // 0;
 
-    my $ai = $self->sampling_frequency->seconds;    #default 15sec
-
-    my ($first_added, $last_added) = (0, 0);
+    my $ai    = $self->sampling_frequency->seconds;    #default 15sec
     my $redis = $self->redis;
 
     my ($unagg_key, $agg_key) = map { $self->_make_key($ul, $_) } (0 .. 1);
@@ -201,7 +199,9 @@ sub _aggregate {
         $self->_update($self->redis, $agg_key, $key, $self->encoder->encode($tick));
     }
 
-    return (\@sorted_agg, Date::Utility->new($first_added), Date::Utility->new($last_added));
+    my @vals = @aggregated_data{@sorted_agg};
+
+    return \@vals;
 
 }
 

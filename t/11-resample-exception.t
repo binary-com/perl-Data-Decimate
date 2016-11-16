@@ -13,6 +13,8 @@ use Text::CSV;
 use Data::Resample::TicksCache;
 use Data::Resample::ResampleCache;
 
+use Data::Dumper;
+
 my $tmp_dir = Path::Tiny->tempdir(CLEANUP => 1);
 
 my $server = Test::TCP->new(
@@ -69,6 +71,26 @@ subtest "missing_ticks" => sub {
 
     is scalar(@$resample_tick), '9', "retrieved 9 resample ticks";
 
+};
+
+subtest "backfill_with_missing_ticks" => sub {
+    my $resample_cache = Data::Resample::ResampleCache->new({
+        redis => $redis,
+    });
+
+    ok $resample_cache, "ResampleCache instance has been created";
+
+    my ($unagg_key, $agg_key) = map { $resample_cache->_make_key('USDJPY', $_) } (0 .. 1);
+
+    $redis->zremrangebyscore($unagg_key, 0, 1479203250);
+    $redis->zremrangebyscore($agg_key,   0, 1479203250);
+
+    my $resample_data = $resample_cache->resample_cache_backfill({
+        symbol => 'USDJPY',
+        ticks  => $ticks,
+    });
+
+    is scalar(@$resample_data), '9', "9 resample data";
 };
 
 sub ticks_from_csv {
