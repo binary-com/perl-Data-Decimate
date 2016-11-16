@@ -52,7 +52,7 @@ subtest "missing_ticks" => sub {
         num    => scalar(@$ticks),
     });
 
-    is scalar(@$tick), '128', "retrieved 142 ticks";
+    is scalar(@$tick), '128', "retrieved 128 ticks";
 
     my $resample_cache = Data::Resample::ResampleCache->new({
         redis => $redis,
