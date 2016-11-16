@@ -92,6 +92,17 @@ subtest "ticks_cache_insert_and_retrieve" => sub {
     });
 
     is scalar(@$tick3), '142', "retrieved 142 ticks";
+
+# try get all resample ticks
+# last tick in our sample
+# USDJPY,1479203250,1479203250,108.254,108.256,108.257
+    $resample_tick = $resample_cache->resample_cache_get({
+        symbol      => 'USDJPY',
+        start_epoch => 1479203101,
+        end_epoch   => 1479203250,
+    });
+
+    is scalar(@$resample_tick), '9', "retrieved 9 resample ticks";
 };
 
 sub ticks_from_csv {
