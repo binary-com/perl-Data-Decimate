@@ -95,6 +95,14 @@ subtest "ticks_cache_insert_and_retrieve" => sub {
 
     is scalar(@$tick3), '142', "retrieved 142 ticks";
 
+    $tick3 = $ticks_cache->tick_cache_get({
+        symbol      => 'USDJPY',
+        start_epoch => 1479203101,
+        end_epoch   => 1479203127,
+    });
+
+    is scalar(@$tick3), '25', "retrieved 25 ticks";
+
 # try get all resample ticks
 # last tick in our sample
 # USDJPY,1479203250,1479203250,108.254,108.256,108.257
