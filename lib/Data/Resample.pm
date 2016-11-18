@@ -83,7 +83,11 @@ has sampling_frequency => (
     coerce  => 1,
 );
 
-has tick_cache_size     => (is => 'ro');
+has tick_cache_size => (
+    is      => 'ro',
+    default => 1860,
+);
+
 has resample_cache_size => (is => 'ro');
 
 has agg_retention_interval => (
@@ -96,7 +100,7 @@ has agg_retention_interval => (
 has unagg_retention_interval => (
     is      => 'ro',
     isa     => 'time_interval',
-    default => '31m',
+    default => default => sub { my $interval = shift->tick_cache_size / 60; return $interval . 'm'; },
     coerce  => 1,
 );
 
