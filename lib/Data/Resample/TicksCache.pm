@@ -70,7 +70,7 @@ sub tick_cache_get {
     my $start  = $args->{start_epoch} // 0;
     my $end    = $args->{end_epoch} // time;
 
-    my @res = map { $decoder->decode($_) } @{$redis->zrangebyscore($self->_make_key($symbol, 0), $start, $end)};
+    my @res = map { $self->decoder->decode($_) } @{$redis->zrangebyscore($self->_make_key($symbol, 0), $start, $end)};
 
     return \@res;
 }
