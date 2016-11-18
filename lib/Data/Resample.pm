@@ -88,21 +88,37 @@ has tick_cache_size => (
     default => 1860,
 );
 
-has resample_cache_size => (is => 'ro');
+has resample_cache_size => (
+    is      => 'ro',
+    default => 2880,
+);
 
 has agg_retention_interval => (
     is      => 'ro',
     isa     => 'time_interval',
-    default => '12h',
+    lazy    => 1,
     coerce  => 1,
+    builder => '_build_agg_retention_interval',
 );
+
+sub _build_agg_retention_interval {
+    my $self = shift;
+    my $interval = int($self->resample_cache_size / (60 / $self->sampling_frequency->seconds));
+    return $interval . 'm';
+}
 
 has unagg_retention_interval => (
     is      => 'ro',
     isa     => 'time_interval',
-    default => sub { my $interval = int(shift->tick_cache_size / 60); return $interval . 'm'; },
+    lazy    => 1,
     coerce  => 1,
+    builder => '_build_unagg_retention_interval',
 );
+
+sub _build_unagg_retention_interval {
+    my $interval = int(shift->tick_cache_size / 60);
+    return $interval . 'm';
+}
 
 has decoder => (
     is      => 'ro',
