@@ -134,6 +134,36 @@ subtest "backfill_test" => sub {
     is scalar(@$resample_tick), '10', "retrieved 10 resample ticks";
 };
 
+subtest "backtest_mode" => sub {
+
+    my $resample_cache = Data::Resample::ResampleCache->new({
+        redis => $redis,
+    });
+
+    ok $resample_cache, "ResampleCache instance has been created";
+
+    my ($unagg_key, $agg_key) = map { $resample_cache->_make_key('USDJPY', $_) } (0 .. 1);
+
+    $redis->zremrangebyscore($unagg_key, 0, 1479203250);
+    $redis->zremrangebyscore($agg_key,   0, 1479203250);
+
+    my $resample_data = $resample_cache->resample_cache_backfill({
+        symbol   => 'USDJPY',
+        ticks    => $ticks,
+        backtest => 1,
+    });
+
+    is scalar(@$resample_data), '10', "10 resample data";
+
+    my $resample_tick = $resample_cache->resample_cache_get({
+        symbol      => 'USDJPY',
+        start_epoch => 1479203101,
+        end_epoch   => 1479203250,
+    });
+
+    is scalar(@$resample_tick), '0', "retrieved 0 resample ticks. for backtest mode, data will not be saved into redis.";
+};
+
 sub ticks_from_csv {
     my $filename = 't/tickdata.csv';
 
