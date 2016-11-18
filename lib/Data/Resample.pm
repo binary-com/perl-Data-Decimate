@@ -207,16 +207,20 @@ sub _aggregate {
             ($agg_epoch) => $_
         } @$ticks;
 
-        # While we are here, clean up any particularly old stuff
-        $redis->zremrangebyscore($unagg_key, 0, $end - $self->unagg_retention_interval->seconds);
-        $redis->zremrangebyscore($agg_key,   0, $end - $self->agg_retention_interval->seconds);
+        if (not $backtest) {
+            # While we are here, clean up any particularly old stuff
+            $redis->zremrangebyscore($unagg_key, 0, $end - $self->unagg_retention_interval->seconds);
+            $redis->zremrangebyscore($agg_key,   0, $end - $self->agg_retention_interval->seconds);
+        }
     }
 
     my @sorted_agg = sort { $a <=> $b } keys %aggregated_data;
 
-    foreach my $key (@sorted_agg) {
-        my $tick = $aggregated_data{$key};
-        $self->_update($self->redis, $agg_key, $key, $self->encoder->encode($tick));
+    if (not $backtest) {
+        foreach my $key (@sorted_agg) {
+            my $tick = $aggregated_data{$key};
+            $self->_update($self->redis, $agg_key, $key, $self->encoder->encode($tick));
+        }
     }
 
     my @vals = @aggregated_data{@sorted_agg};
