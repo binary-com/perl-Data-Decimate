@@ -100,7 +100,7 @@ has agg_retention_interval => (
 has unagg_retention_interval => (
     is      => 'ro',
     isa     => 'time_interval',
-    default => default => sub { my $interval = int(shift->tick_cache_size / 60); return $interval . 'm'; },
+    default => sub { my $interval = int(shift->tick_cache_size / 60); return $interval . 'm'; },
     coerce  => 1,
 );
 
