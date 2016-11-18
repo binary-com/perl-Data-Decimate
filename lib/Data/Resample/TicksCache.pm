@@ -60,7 +60,7 @@ sub tick_cache_insert {
 
 =head2 tick_cache_get
 
-Retrieve ticks from start epoch till end opech .
+Retrieve ticks from start epoch till end epoch .
 
 =cut
 
@@ -70,13 +70,9 @@ sub tick_cache_get {
     my $start  = $args->{start_epoch} // 0;
     my $end    = $args->{end_epoch} // time;
 
-    my $num = $end - $start;
+    my @res = map { $decoder->decode($_) } @{$redis->zrangebyscore($self->_make_key($symbol, 0), $start, $end)};
 
-    return tick_cache_get_num_ticks({
-        symbol    => $symbol,
-        end_epoch => $end,
-        num       => $num,
-    });
+    return \@res;
 }
 
 =head2 tick_cache_get_num_ticks
