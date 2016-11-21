@@ -24,7 +24,7 @@ coerce 'time_interval', from 'Str', via { Time::Duration::Concise->new(interval 
 
 =head1 NAME
 
-Data::Resample 
+Data::Resample - A module that allows to resample a data feed. 
 
 =head1 VERSION
 
