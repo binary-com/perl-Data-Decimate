@@ -13,14 +13,14 @@ use Sereal::Decoder;
 
 use MooseX::Types::Moose qw(Int Num Str);
 use MooseX::Types -declare => [qw(
-        time_interval
+        interval
         )];
 
 use Moose::Util::TypeConstraints;
 use Time::Duration::Concise;
 
-subtype 'time_interval', as 'Time::Duration::Concise';
-coerce 'time_interval', from 'Str', via { Time::Duration::Concise->new(interval => $_) };
+subtype 'interval', as 'Time::Duration::Concise';
+coerce 'interval', from 'Str', via { Time::Duration::Concise->new(interval => $_) };
 
 =head1 NAME
 
@@ -78,7 +78,7 @@ our $VERSION = '0.01';
 
 has sampling_frequency => (
     is      => 'ro',
-    isa     => 'time_interval',
+    isa     => 'interval',
     default => '15s',
     coerce  => 1,
 );
@@ -95,7 +95,7 @@ has resample_cache_size => (
 
 has agg_retention_interval => (
     is      => 'ro',
-    isa     => 'time_interval',
+    isa     => 'interval',
     lazy    => 1,
     coerce  => 1,
     builder => '_build_agg_retention_interval',
@@ -109,7 +109,7 @@ sub _build_agg_retention_interval {
 
 has unagg_retention_interval => (
     is      => 'ro',
-    isa     => 'time_interval',
+    isa     => 'interval',
     lazy    => 1,
     coerce  => 1,
     builder => '_build_unagg_retention_interval',
