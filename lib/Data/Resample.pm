@@ -176,6 +176,34 @@ sub _update {
     return $redis->zadd($key, $score, $value);
 }
 
+=head2 _check_missing_ticks
+
+=cut
+
+sub _check_missing_ticks {
+    my ($self, $args) = @_;
+
+    my $aggregated_data = $args->{agg_data};
+
+    my @sorted_agg = sort { $a <=> $b } keys %$aggregated_data;
+
+    my $first_key = $sorted_agg[0];
+    my $last_key  = $sorted_agg[-1];
+
+    for (my $i = $first_key; $i <= $last_key; $i = $i + 15) {
+        my $tick = $aggregated_data->{$i};
+
+        if (not $tick) {
+            my $tick     = $aggregated_data->{$i - 15};
+            my %to_store = %$tick;
+            $to_store{agg_epoch} = $i;
+            $aggregated_data->{$i} = \%to_store;
+        }
+    }
+
+    return $aggregated_data;
+}
+
 =head2 _aggregate
 
 =cut
@@ -209,36 +237,36 @@ sub _aggregate {
 
     }
 
-    my @sorted_agg = sort { $a <=> $b } keys %aggregated_data;
+    #my @sorted_agg = sort { $a <=> $b } keys %aggregated_data;
 
-    #Do sanity check. Key is agg epoch
-    my $first_key = $sorted_agg[0];
-    my $last_key  = $sorted_agg[-1];
+#    my $first_key = $sorted_agg[0];
+#    my $last_key  = $sorted_agg[-1];
 
-    for (my $i = $first_key; $i <= $last_key; $i = $i + 15) {
-        my $tick = $aggregated_data{$i};
+#    for (my $i = $first_key; $i <= $last_key; $i = $i + 15) {
+#        my $tick = $aggregated_data{$i};
 
-        if (not $tick) {
-            my $tick     = $aggregated_data{$i - 15};
-            my %to_store = %$tick;
-            $to_store{agg_epoch} = $i;
-            $aggregated_data{$i} = \%to_store;
-        }
-    }
+#        if (not $tick) {
+#            my $tick     = $aggregated_data{$i - 15};
+#            my %to_store = %$tick;
+#            $to_store{agg_epoch} = $i;
+#            $aggregated_data{$i} = \%to_store;
+#        }
+#    }
 
-    @sorted_agg = sort { $a <=> $b } keys %aggregated_data;
+    my $res = $self->_check_missing_ticks({
+        agg_data => \%aggregated_data,
+    });
 
-    my $prev_tick;
+    @sorted_agg = sort { $a <=> $b } keys %$res;
+
     if (not $backtest) {
         foreach my $key (@sorted_agg) {
-            my $tick = $aggregated_data{$key};
+            my $tick = $res->{$key};
             $self->_update($self->redis, $agg_key, $key, $self->encoder->encode($tick));
-
-            $prev_tick = $tick;
         }
     }
 
-    my @vals = @aggregated_data{@sorted_agg};
+    my @vals = @$res->{@sorted_agg};
 
     return \@vals;
 
