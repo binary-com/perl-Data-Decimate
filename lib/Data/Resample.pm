@@ -186,17 +186,17 @@ sub _check_missing_ticks {
     my $aggregated_data = $args->{agg_data};
 
     my @sorted_agg = sort { $a <=> $b } keys %$aggregated_data;
+    my $first_key  = $sorted_agg[0];
+    my $last_key   = $sorted_agg[-1];
 
-    my $first_key = $sorted_agg[0];
-    my $last_key  = $sorted_agg[-1];
-
-    for (my $i = $first_key; $i <= $last_key; $i = $i + 15) {
+    for (my $i = $first_key; $i <= $last_key; $i = $i + $self->sampling_frequency->seconds) {
         my $tick = $aggregated_data->{$i};
 
         if (not $tick) {
-            my $tick     = $aggregated_data->{$i - 15};
+            my $tick     = $aggregated_data->{$i - $self->sampling_frequency->seconds};
             my %to_store = %$tick;
-            $to_store{agg_epoch} = $i;
+            $to_store{agg_epoch}   = $i;
+            $to_store{count}       = 0;
             $aggregated_data->{$i} = \%to_store;
         }
     }
@@ -219,7 +219,7 @@ sub _aggregate {
     my $ai    = $self->sampling_frequency->seconds;    #default 15sec
     my $redis = $self->redis;
 
-    my ($unagg_key, $agg_key) = map { $self->_make_key($ul, $_) } (0 .. 1);
+    my $agg_key = $self->_make_key($ul, 1);
 
     my $counter        = 0;
     my $prev_agg_epoch = 0;
@@ -237,22 +237,6 @@ sub _aggregate {
 
     }
 
-    #my @sorted_agg = sort { $a <=> $b } keys %aggregated_data;
-
-#    my $first_key = $sorted_agg[0];
-#    my $last_key  = $sorted_agg[-1];
-
-#    for (my $i = $first_key; $i <= $last_key; $i = $i + 15) {
-#        my $tick = $aggregated_data{$i};
-
-#        if (not $tick) {
-#            my $tick     = $aggregated_data{$i - 15};
-#            my %to_store = %$tick;
-#            $to_store{agg_epoch} = $i;
-#            $aggregated_data{$i} = \%to_store;
-#        }
-#    }
-
     my $res = $self->_check_missing_ticks({
         agg_data => \%aggregated_data,
     });
@@ -268,7 +252,6 @@ sub _aggregate {
 
     my @vals = map { $res->{$_} } @sorted_agg;
     return \@vals;
-
 }
 
 =head1 AUTHOR

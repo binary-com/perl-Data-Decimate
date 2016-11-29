@@ -43,7 +43,6 @@ sub tick_cache_insert {
             my @ticks =
             map { $self->decoder->decode($_) } @{$self->redis->zrangebyscore($key, $boundary - $self->sampling_frequency->seconds - 1, $boundary)})
         {
-
             #do aggregation
             my $agg = $self->_aggregate({
                 symbol    => $to_store{symbol},
