@@ -257,7 +257,7 @@ sub _aggregate {
         agg_data => \%aggregated_data,
     });
 
-    @sorted_agg = sort { $a <=> $b } keys %$res;
+    my @sorted_agg = sort { $a <=> $b } keys %$res;
 
     if (not $backtest) {
         foreach my $key (@sorted_agg) {
