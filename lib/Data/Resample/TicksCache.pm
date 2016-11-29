@@ -49,6 +49,20 @@ sub tick_cache_insert {
                 end_epoch => $boundary,
                 ticks     => \@ticks,
             });
+        } elsif (
+            my @agg = map {
+                $self->decoder->decode($_)
+            } reverse @{
+                $self->redis->zrevrangebyscore(
+                    $self->_make_key($to_store{symbol}, 1),
+                    $boundary - $self->sampling_frequency->seconds,
+                    0, 'LIMIT', 0, 1
+                )})
+        {
+            my $tick = $agg[0];
+            $tick->{agg_epoch} = $boundary;
+            $tick->{count}     = 0;
+            $self->_update($self->redis, $self->_make_key($to_store{symbol}, 1), $tick->{agg_epoch}, $self->encoder->encode($tick));
         }
     }
 
