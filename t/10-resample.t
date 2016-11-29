@@ -112,7 +112,7 @@ subtest "ticks_cache_insert_and_retrieve" => sub {
         end_epoch   => 1479203250,
     });
 
-    is scalar(@$resample_tick), '9', "retrieved 9 resample ticks";
+    is scalar(@$resample_tick), '17', "retrieved 17 resample ticks";
 };
 
 subtest "backfill_test" => sub {

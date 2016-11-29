@@ -69,7 +69,7 @@ subtest "missing_ticks" => sub {
         end_epoch   => 1479203250,
     });
 
-    is scalar(@$resample_tick), '8', "retrieved 8 resample ticks";
+    is scalar(@$resample_tick), '13', "retrieved 13 resample ticks";
 
 };
 
@@ -90,7 +90,7 @@ subtest "backfill_with_missing_ticks" => sub {
         ticks  => $ticks,
     });
 
-    is scalar(@$resample_data), '9', "9 resample data";
+    is scalar(@$resample_data), '10', "10 resample data";
 };
 
 sub ticks_from_csv {
