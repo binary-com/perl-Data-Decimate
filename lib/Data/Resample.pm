@@ -266,7 +266,7 @@ sub _aggregate {
         }
     }
 
-    my @vals = map { $res{$_} } @sorted_agg;
+    my @vals = map { $res->{$_} } @sorted_agg;
     return \@vals;
 
 }
