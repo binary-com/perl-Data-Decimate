@@ -266,7 +266,7 @@ sub _aggregate {
         }
     }
 
-    my @vals = @$res->{@sorted_agg};
+    my @vals = @%{$res->{@sorted_agg}};
 
     return \@vals;
 
