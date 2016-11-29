@@ -6,7 +6,9 @@ use warnings;
 use 5.010;
 use Moose;
 
-use List::Util qw( first min max );
+use Scalar::Util qw( blessed );
+use Sereal::Encoder;
+use Sereal::Decoder;
 
 extends 'Data::Resample';
 
@@ -19,8 +21,8 @@ extends 'Data::Resample';
 sub resample_cache_backfill {
     my ($self, $args) = @_;
 
-    my $symbol   = $args->{symbol};
-    my $ticks    = $args->{ticks} // [];
+    my $symbol   = $args->{symbol}   // '';
+    my $ticks    = $args->{ticks}    // [];
     my $backtest = $args->{backtest} // 0;
 
     my $key = $self->_make_key($symbol, 0);
@@ -45,9 +47,9 @@ sub resample_cache_backfill {
 sub resample_cache_get {
     my ($self, $args) = @_;
 
-    my $which = $args->{symbol};
+    my $which = $args->{symbol}      // '';
     my $start = $args->{start_epoch} // 0;
-    my $end   = $args->{end_epoch} // time;
+    my $end   = $args->{end_epoch}   // time;
 
     my $ti    = $self->agg_retention_interval;
     my $redis = $self->redis;
@@ -58,7 +60,9 @@ sub resample_cache_get {
 
     @res = map { $self->decoder->decode($_) } @{$redis->zrangebyscore($key, $start, $end)};
 
-    return \@res;
+    my @sorted = sort { $a->{epoch} <=> $b->{epoch} } @res;
+
+    return \@sorted;
 }
 
 no Moose;

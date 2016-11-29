@@ -173,7 +173,6 @@ sub _make_key {
 sub _update {
     my ($self, $redis, $key, $score, $value) = @_;
 
-    $redis->zremrangebyscore($key, $score, $score);
     return $redis->zadd($key, $score, $value);
 }
 
@@ -202,24 +201,40 @@ sub _aggregate {
         %aggregated_data = map {
             my $agg_epoch = ($_->{epoch} % $ai) == 0 ? $_->{epoch} : $_->{epoch} - ($_->{epoch} % $ai) + $ai;
             $counter = ($agg_epoch == $prev_agg_epoch) ? $counter + 1 : 1;
-            $_->{count} = $counter;
+            $_->{count}     = $counter;
+            $_->{agg_epoch} = $agg_epoch;
             $prev_agg_epoch = $agg_epoch;
             ($agg_epoch) => $_
         } @$ticks;
 
-        if (not $backtest) {
-            # While we are here, clean up any particularly old stuff
-            $redis->zremrangebyscore($unagg_key, 0, $end - $self->unagg_retention_interval->seconds);
-            $redis->zremrangebyscore($agg_key,   0, $end - $self->agg_retention_interval->seconds);
-        }
     }
 
     my @sorted_agg = sort { $a <=> $b } keys %aggregated_data;
 
+    #Do sanity check. Key is agg epoch
+    my $first_key = $sorted_agg[0];
+    my $last_key  = $sorted_agg[-1];
+
+    for (my $i = $first_key; $i <= $last_key; $i = $i + 15) {
+        my $tick = $aggregated_data{$i};
+
+        if (not $tick) {
+            my $tick     = $aggregated_data{$i - 15};
+            my %to_store = %$tick;
+            $to_store{agg_epoch} = $i;
+            $aggregated_data{$i} = \%to_store;
+        }
+    }
+
+    @sorted_agg = sort { $a <=> $b } keys %aggregated_data;
+
+    my $prev_tick;
     if (not $backtest) {
         foreach my $key (@sorted_agg) {
             my $tick = $aggregated_data{$key};
             $self->_update($self->redis, $agg_key, $key, $self->encoder->encode($tick));
+
+            $prev_tick = $tick;
         }
     }
 
