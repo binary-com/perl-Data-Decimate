@@ -142,7 +142,12 @@ sub _build_encoder {
     });
 }
 
-has 'redis' => (
+has 'redis_read' => (
+    is       => 'ro',
+    required => 1
+);
+
+has 'redis_write' => (
     is       => 'ro',
     required => 1
 );
@@ -216,8 +221,7 @@ sub _aggregate {
     my $ticks    = $args->{ticks};
     my $backtest = $args->{backtest} // 0;
 
-    my $ai    = $self->sampling_frequency->seconds;    #default 15sec
-    my $redis = $self->redis;
+    my $ai = $self->sampling_frequency->seconds;    #default 15sec
 
     my $agg_key = $self->_make_key($ul, 1);
 
@@ -246,7 +250,7 @@ sub _aggregate {
     if (not $backtest) {
         foreach my $key (@sorted_agg) {
             my $tick = $res->{$key};
-            $self->_update($self->redis, $agg_key, $key, $self->encoder->encode($tick));
+            $self->_update($self->redis_write, $agg_key, $key, $self->encoder->encode($tick));
         }
     }
 

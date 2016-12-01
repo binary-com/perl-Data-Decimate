@@ -29,7 +29,7 @@ sub resample_cache_backfill {
 
     if (not $backtest) {
         foreach my $tick (@$ticks) {
-            $self->_update($self->redis, $key, $tick->{epoch}, $self->encoder->encode($tick));
+            $self->_update($self->redis_write, $key, $tick->{epoch}, $self->encoder->encode($tick));
         }
     }
 
@@ -52,7 +52,7 @@ sub resample_cache_get {
     my $end   = $args->{end_epoch}   // time;
 
     my $ti    = $self->agg_retention_interval;
-    my $redis = $self->redis;
+    my $redis = $self->redis_read;
 
     my @res;
 

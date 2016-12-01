@@ -41,7 +41,8 @@ sub tick_cache_insert {
     if ($current_epoch > $boundary and $prev_added_epoch <= $boundary) {
         if (
             my @ticks =
-            map { $self->decoder->decode($_) } @{$self->redis->zrangebyscore($key, $boundary - $self->sampling_frequency->seconds - 1, $boundary)})
+            map { $self->decoder->decode($_) }
+            @{$self->redis_read->zrangebyscore($key, $boundary - $self->sampling_frequency->seconds - 1, $boundary)})
         {
             #do aggregation
             my $agg = $self->_aggregate({
@@ -53,7 +54,7 @@ sub tick_cache_insert {
             my @agg = map {
                 $self->decoder->decode($_)
             } reverse @{
-                $self->redis->zrevrangebyscore(
+                $self->redis_read->zrevrangebyscore(
                     $self->_make_key($to_store{symbol}, 1),
                     $boundary - $self->sampling_frequency->seconds,
                     0, 'LIMIT', 0, 1
@@ -62,13 +63,13 @@ sub tick_cache_insert {
             my $tick = $agg[0];
             $tick->{agg_epoch} = $boundary;
             $tick->{count}     = 0;
-            $self->_update($self->redis, $self->_make_key($to_store{symbol}, 1), $tick->{agg_epoch}, $self->encoder->encode($tick));
+            $self->_update($self->redis_write, $self->_make_key($to_store{symbol}, 1), $tick->{agg_epoch}, $self->encoder->encode($tick));
         }
     }
 
     $prev_added_epoch{$to_store{symbol}} = $current_epoch;
 
-    return $self->_update($self->redis, $key, $tick->{epoch}, $self->encoder->encode(\%to_store));
+    return $self->_update($self->redis_write, $key, $tick->{epoch}, $self->encoder->encode(\%to_store));
 }
 
 =head2 tick_cache_get
@@ -83,7 +84,7 @@ sub tick_cache_get {
     my $start  = $args->{start_epoch} // 0;
     my $end    = $args->{end_epoch} // time;
 
-    my @res = map { $self->decoder->decode($_) } @{$self->redis->zrangebyscore($self->_make_key($symbol, 0), $start, $end)};
+    my @res = map { $self->decoder->decode($_) } @{$self->redis_read->zrangebyscore($self->_make_key($symbol, 0), $start, $end)};
 
     return \@res;
 }
@@ -104,7 +105,7 @@ sub tick_cache_get_num_ticks {
 
     my @res;
 
-    @res = map { $self->decoder->decode($_) } reverse @{$self->redis->zrevrangebyscore($self->_make_key($symbol, 0), $end, 0, 'LIMIT', 0, $num)};
+    @res = map { $self->decoder->decode($_) } reverse @{$self->redis_read->zrevrangebyscore($self->_make_key($symbol, 0), $end, 0, 'LIMIT', 0, $num)};
 
     return \@res;
 }

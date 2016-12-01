@@ -40,7 +40,8 @@ my $ticks = ticks_from_csv();
 
 subtest "missing_ticks" => sub {
     my $ticks_cache = Data::Resample::TicksCache->new({
-        redis => $redis,
+        redis_read  => $redis,
+        redis_write => $redis,
     });
 
     ok $ticks_cache, "TicksCache instance has been created";
@@ -57,7 +58,8 @@ subtest "missing_ticks" => sub {
     is scalar(@$tick), '128', "retrieved 128 ticks";
 
     my $resample_cache = Data::Resample::ResampleCache->new({
-        redis => $redis,
+        redis_read  => $redis,
+        redis_write => $redis,
     });
 
 # try get all resample ticks
@@ -75,7 +77,8 @@ subtest "missing_ticks" => sub {
 
 subtest "backfill_with_missing_ticks" => sub {
     my $resample_cache = Data::Resample::ResampleCache->new({
-        redis => $redis,
+        redis_read  => $redis,
+        redis_write => $redis,
     });
 
     ok $resample_cache, "ResampleCache instance has been created";

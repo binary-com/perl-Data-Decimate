@@ -38,7 +38,8 @@ my $ticks = ticks_from_csv();
 
 subtest "ticks_cache_insert_and_retrieve" => sub {
     my $ticks_cache = Data::Resample::TicksCache->new({
-        redis => $redis,
+        redis_read  => $redis,
+        redis_write => $redis,
     });
 
     ok $ticks_cache, "TicksCache instance has been created";
@@ -72,7 +73,8 @@ subtest "ticks_cache_insert_and_retrieve" => sub {
 #last inserted tick
 #USDJPY,1479203118,1479203130,108.29,108.291,108.291
     my $resample_cache = Data::Resample::ResampleCache->new({
-        redis => $redis,
+        redis_read  => $redis,
+        redis_write => $redis,
     });
 
     my $resample_tick = $resample_cache->resample_cache_get({
@@ -118,7 +120,8 @@ subtest "ticks_cache_insert_and_retrieve" => sub {
 subtest "backfill_test" => sub {
 
     my $resample_cache = Data::Resample::ResampleCache->new({
-        redis => $redis,
+        redis_read  => $redis,
+        redis_write => $redis,
     });
 
     ok $resample_cache, "ResampleCache instance has been created";
@@ -145,7 +148,8 @@ subtest "backfill_test" => sub {
 subtest "backtest_mode" => sub {
 
     my $resample_cache = Data::Resample::ResampleCache->new({
-        redis => $redis,
+        redis_read  => $redis,
+        redis_write => $redis,
     });
 
     ok $resample_cache, "ResampleCache instance has been created";
@@ -204,8 +208,5 @@ sub ticks_from_csv {
 
     return \@ticks;
 }
-
-#kill 9, $server->pid;
-#$server->stop;
 
 done_testing;
