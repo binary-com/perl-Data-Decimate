@@ -9,27 +9,45 @@ A module that allows you to resample a data feed
   use Data::Resample::ResampleCache;
 
   my $ticks_cache = Data::Resample::TicksCache->new({
-        redis => $redis,
+        redis_read  => $redis,
+        redis_write => $redis,
         });
 
-  my %tick = (
-        symbol => 'USDJPY',
+  my @data_feed = [
+        {symbol => 'Symbol',
         epoch  => time,
-        quote  => 103.0,
-        bid    => 103.0,
-        ask    => 103.0,
-  );
+        ...},
+        {symbol => 'Symbol',
+        epoch  => time+1,
+        ...},
+        {symbol => 'Symbol',
+        epoch  => time+2,
+        ...},
+        ...
+  ];
 
-  $ticks_cache->tick_cache_insert(\%tick);
+  #Use tick_cache_insert to insert a single data
+  foreach my $data (@data_feed) {
+        $ticks_cache->tick_cache_insert($data);
+  }
 
+  #Use the get function to retrieve data
   my $ticks = $ticks_cache->tick_cache_get_num_ticks({
-        symbol => 'USDJPY',
-        });
+        symbol    => 'Symbol',
+        end_epoch => time+3
+        num       => 3,
+        }););
 
+  #Backfill function
   my $resample_cache = Data::Resample::ResampleCache->new({
-        redis => $redis,
+        redis_read  => $redis,
+        redis_write => $redis,
         });
 
+  $resample_cache->resample_cache_backfill({
+        symbol => 'Symbol',
+        ticks  => \@data_feed,
+        });
 ```
 
 #### INSTALLATION

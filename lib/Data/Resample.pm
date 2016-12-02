@@ -60,8 +60,9 @@ Version 0.01
 
   #Use the get function to retrieve data
   my $ticks = $ticks_cache->tick_cache_get_num_ticks({
-        symbol => 'Symbol',
-        num => 3,
+        symbol    => 'Symbol',
+        end_epoch => time+3,
+        num       => 3,
         });
   
   #Backfill function
