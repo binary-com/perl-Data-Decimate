@@ -36,25 +36,43 @@ Version 0.01
   use Data::Resample::ResampleCache;
 
   my $ticks_cache = Data::Resample::TicksCache->new({
-        redis => $redis,
+        redis_read  => $redis,
+        redis_write => $redis,
         });
 
-  my %tick = (
-        symbol => 'USDJPY',
+  my @data_feed = [
+        {symbol => 'Symbol',
         epoch  => time,
-        quote  => 103.0,
-        bid    => 103.0,
-        ask    => 103.0,
-  );
+        ...},
+        {symbol => 'Symbol',
+        epoch  => time+1,
+        ...},
+        {symbol => 'Symbol',
+        epoch  => time+2,
+        ...},
+        ...
+  ];
 
-  $ticks_cache->tick_cache_insert(\%tick);
+  #Use tick_cache_insert to insert a single data
+  foreach my $data (@data_feed) {
+  	$ticks_cache->tick_cache_insert($data);
+  }
 
+  #Use the get function to retrieve data
   my $ticks = $ticks_cache->tick_cache_get_num_ticks({
-        symbol => 'USDJPY',
+        symbol => 'Symbol',
+        num => 3,
+        });
+  
+  #Backfill function
+  my $resample_cache = Data::Resample::ResampleCache->new({
+        redis_read  => $redis,
+        redis_write => $redis,
         });
 
-  my $resample_cache = Data::Resample::ResampleCache->new({
-        redis => $redis,
+  $resample_cache->resample_cache_backfill({
+	symbol => 'Symbol',
+        ticks  => \@data_feed,
         });
 
 =head1 DESCRIPTION
@@ -93,29 +111,29 @@ has resample_cache_size => (
     default => 2880,
 );
 
-has agg_retention_interval => (
+has resample_retention_interval => (
     is      => 'ro',
     isa     => 'interval',
     lazy    => 1,
     coerce  => 1,
-    builder => '_build_agg_retention_interval',
+    builder => '_build_resample_retention_interval',
 );
 
-sub _build_agg_retention_interval {
+sub _build_resample_retention_interval {
     my $self = shift;
     my $interval = int($self->resample_cache_size / (60 / $self->sampling_frequency->seconds));
     return $interval . 'm';
 }
 
-has unagg_retention_interval => (
+has raw_retention_interval => (
     is      => 'ro',
     isa     => 'interval',
     lazy    => 1,
     coerce  => 1,
-    builder => '_build_unagg_retention_interval',
+    builder => '_build_raw_retention_interval',
 );
 
-sub _build_unagg_retention_interval {
+sub _build_raw_retention_interval {
     my $interval = int(shift->tick_cache_size / 60);
     return $interval . 'm';
 }
@@ -165,7 +183,7 @@ sub _make_key {
     if ($agg) {
         push @bits, ($self->sampling_frequency->as_concise_string, 'AGG');
     } else {
-        push @bits, ($self->unagg_retention_interval->as_concise_string, 'FULL');
+        push @bits, ($self->raw_retention_interval->as_concise_string, 'FULL');
     }
 
     return join('_', @bits);
@@ -181,39 +199,39 @@ sub _update {
     return $redis->zadd($key, $score, $value);
 }
 
-=head2 _check_missing_ticks
+=head2 _check_missing_data
 
 =cut
 
-sub _check_missing_ticks {
+sub _check_missing_data {
     my ($self, $args) = @_;
 
-    my $aggregated_data = $args->{agg_data};
+    my $resample_data = $args->{resample_data};
 
-    my @sorted_agg = sort { $a <=> $b } keys %$aggregated_data;
-    my $first_key  = $sorted_agg[0];
-    my $last_key   = $sorted_agg[-1];
+    my @sorted_data = sort { $a <=> $b } keys %$resample_data;
+    my $first_key   = $sorted_data[0];
+    my $last_key    = $sorted_data[-1];
 
     for (my $i = $first_key; $i <= $last_key; $i = $i + $self->sampling_frequency->seconds) {
-        my $tick = $aggregated_data->{$i};
+        my $tick = $resample_data->{$i};
 
         if (not $tick) {
-            my $tick     = $aggregated_data->{$i - $self->sampling_frequency->seconds};
+            my $tick     = $resample_data->{$i - $self->sampling_frequency->seconds};
             my %to_store = %$tick;
-            $to_store{agg_epoch}   = $i;
-            $to_store{count}       = 0;
-            $aggregated_data->{$i} = \%to_store;
+            $to_store{agg_epoch} = $i;
+            $to_store{count}     = 0;
+            $resample_data->{$i} = \%to_store;
         }
     }
 
-    return $aggregated_data;
+    return $resample_data;
 }
 
-=head2 _aggregate
+=head2 _resample
 
 =cut
 
-sub _aggregate {
+sub _resample {
     my ($self, $args) = @_;
 
     my $ul       = $args->{symbol};
@@ -227,10 +245,10 @@ sub _aggregate {
 
     my $counter        = 0;
     my $prev_agg_epoch = 0;
-    my %aggregated_data;
+    my %resample_data;
 
     if ($ticks) {
-        %aggregated_data = map {
+        %resample_data = map {
             my $agg_epoch = ($_->{epoch} % $ai) == 0 ? $_->{epoch} : $_->{epoch} - ($_->{epoch} % $ai) + $ai;
             $counter = ($agg_epoch == $prev_agg_epoch) ? $counter + 1 : 1;
             $_->{count}     = $counter;
@@ -238,23 +256,22 @@ sub _aggregate {
             $prev_agg_epoch = $agg_epoch;
             ($agg_epoch) => $_
         } @$ticks;
-
     }
 
-    my $res = $self->_check_missing_ticks({
-        agg_data => \%aggregated_data,
+    my $res = $self->_check_missing_data({
+        resample_data => \%resample_data,
     });
 
-    my @sorted_agg = sort { $a <=> $b } keys %$res;
+    my @sorted_data = sort { $a <=> $b } keys %$res;
 
     if (not $backtest) {
-        foreach my $key (@sorted_agg) {
+        foreach my $key (@sorted_data) {
             my $tick = $res->{$key};
             $self->_update($self->redis_write, $agg_key, $key, $self->encoder->encode($tick));
         }
     }
 
-    my @vals = map { $res->{$_} } @sorted_agg;
+    my @vals = map { $res->{$_} } @sorted_data;
     return \@vals;
 }
 

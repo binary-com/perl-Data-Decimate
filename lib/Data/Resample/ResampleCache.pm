@@ -33,7 +33,7 @@ sub resample_cache_backfill {
         }
     }
 
-    return $self->_aggregate({
+    return $self->_resample({
         symbol   => $symbol,
         ticks    => $ticks,
         backtest => $backtest,
@@ -51,11 +51,9 @@ sub resample_cache_get {
     my $start = $args->{start_epoch} // 0;
     my $end   = $args->{end_epoch}   // time;
 
-    my $ti    = $self->agg_retention_interval;
     my $redis = $self->redis_read;
 
     my @res;
-
     my $key = $self->_make_key($which, 1);
 
     @res = map { $self->decoder->decode($_) } @{$redis->zrangebyscore($key, $start, $end)};
