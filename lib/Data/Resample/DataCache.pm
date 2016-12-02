@@ -45,7 +45,7 @@ sub data_cache_insert {
             @{$self->redis_read->zrangebyscore($key, $boundary - $self->sampling_frequency->seconds - 1, $boundary)})
         {
             #do resampling
-            my $agg = $self->_resample({
+            $self->_resample({
                 symbol    => $to_store{symbol},
                 end_epoch => $boundary,
                 data      => \@datas,
@@ -66,7 +66,7 @@ sub data_cache_insert {
             $self->_update(
                 $self->redis_write,
                 $self->_make_key($to_store{symbol}, 1),
-                $single_data->{agg_epoch},
+                $single_data->{resample_epoch},
                 $self->encoder->encode($single_data));
         }
     }

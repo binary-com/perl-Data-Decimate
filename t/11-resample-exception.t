@@ -36,46 +36,46 @@ my $redis = RedisDB->new(
 
 ok $redis, "redisdb object instance has been created";
 
-my $ticks = ticks_from_csv();
+my $datas = datas_from_csv();
 
-subtest "missing_ticks" => sub {
-    my $ticks_cache = Data::Resample::TicksCache->new({
+subtest "missing_datas" => sub {
+    my $data_cache = Data::Resample::DataCache->new({
         redis_read  => $redis,
         redis_write => $redis,
     });
 
-    ok $ticks_cache, "TicksCache instance has been created";
+    ok $data_cache, "DataCache instance has been created";
 
-    for (my $i = 0; $i < scalar(@$ticks); $i++) {
-        $ticks_cache->tick_cache_insert($ticks->[$i]);
+    for (my $i = 0; $i < scalar(@$datas); $i++) {
+        $data_cache->data_cache_insert($datas->[$i]);
     }
 
-    my $tick = $ticks_cache->tick_cache_get_num_ticks({
+    my $data = $data_cache->data_cache_get_num_data({
         symbol => 'USDJPY',
-        num    => scalar(@$ticks),
+        num    => scalar(@$datas),
     });
 
-    is scalar(@$tick), '128', "retrieved 128 ticks";
+    is scalar(@$data), '128', "retrieved 128 datas";
 
     my $resample_cache = Data::Resample::ResampleCache->new({
         redis_read  => $redis,
         redis_write => $redis,
     });
 
-# try get all resample ticks
-# last tick in our sample
+# try get all resample datas
+# last data in our sample
 # USDJPY,1479203250,1479203250,108.254,108.256,108.257
-    my $resample_tick = $resample_cache->resample_cache_get({
+    my $resample_data = $resample_cache->resample_cache_get({
         symbol      => 'USDJPY',
         start_epoch => 1479203101,
         end_epoch   => 1479203250,
     });
 
-    is scalar(@$resample_tick), '13', "retrieved 13 resample ticks";
+    is scalar(@$resample_data), '13', "retrieved 13 resample datas";
 
 };
 
-subtest "backfill_with_missing_ticks" => sub {
+subtest "backfill_with_missing_datas" => sub {
     my $resample_cache = Data::Resample::ResampleCache->new({
         redis_read  => $redis,
         redis_write => $redis,
@@ -83,21 +83,21 @@ subtest "backfill_with_missing_ticks" => sub {
 
     ok $resample_cache, "ResampleCache instance has been created";
 
-    my ($unagg_key, $agg_key) = map { $resample_cache->_make_key('USDJPY', $_) } (0 .. 1);
+    my ($raw_key, $resample_key) = map { $resample_cache->_make_key('USDJPY', $_) } (0 .. 1);
 
-    $redis->zremrangebyscore($unagg_key, 0, 1479203250);
-    $redis->zremrangebyscore($agg_key,   0, 1479203250);
+    $redis->zremrangebyscore($raw_key,      0, 1479203250);
+    $redis->zremrangebyscore($resample_key, 0, 1479203250);
 
     my $resample_data = $resample_cache->resample_cache_backfill({
         symbol => 'USDJPY',
-        ticks  => $ticks,
+        data   => $datas,
     });
 
     is scalar(@$resample_data), '10', "10 resample data";
 };
 
-sub ticks_from_csv {
-    my $filename = 't/tickdata2.csv';
+sub datas_from_csv {
+    my $filename = 't/sampledata2.csv';
 
     open(my $fh, '<:utf8', $filename) or die "Can't open $filename: $!";
 
@@ -116,17 +116,17 @@ sub ticks_from_csv {
     $csv->parse($header);
     $csv->column_names([$csv->fields]);
 
-    my @ticks;
+    my @datas;
 
 # parse the rest
     while (my $row = $csv->getline_hr($fh)) {
-        push @ticks, $row;
+        push @datas, $row;
     }
 
     $csv->eof or $csv->error_diag;
     close $fh;
 
-    return \@ticks;
+    return \@datas;
 }
 
 done_testing;
