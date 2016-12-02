@@ -167,8 +167,7 @@ has 'redis_read' => (
 );
 
 has 'redis_write' => (
-    is       => 'ro',
-    required => 1
+    is => 'ro',
 );
 
 =head1 SUBROUTINES/METHODS
