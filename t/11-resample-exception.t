@@ -10,7 +10,7 @@ use Test::TCP;
 use Test::FailWarnings;
 use Text::CSV;
 
-use Data::Resample::TicksCache;
+use Data::Resample::DataCache;
 use Data::Resample::ResampleCache;
 
 use Data::Dumper;
