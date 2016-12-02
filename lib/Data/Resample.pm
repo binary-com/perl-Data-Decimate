@@ -35,7 +35,7 @@ Version 0.01
   use Data::Resample::DataCache;
   use Data::Resample::ResampleCache;
 
-  my $data_cache = Data::Resample::TicksCache->new({
+  my $data_cache = Data::Resample::DataCache->new({
         redis_read  => $redis,
         redis_write => $redis,
         });
@@ -180,9 +180,9 @@ has 'redis_write' => (
 sub _make_key {
     my ($self, $symbol, $resample) = @_;
 
-    my @bits = ("AGGTICKS", $symbol);
+    my @bits = ("RESAMPLE", $symbol);
     if ($resample) {
-        push @bits, ($self->sampling_frequency->as_concise_string, 'AGG');
+        push @bits, ($self->sampling_frequency->as_concise_string, 'RESAMPLE');
     } else {
         push @bits, ($self->raw_retention_interval->as_concise_string, 'FULL');
     }
