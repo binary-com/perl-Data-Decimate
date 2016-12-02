@@ -5,10 +5,10 @@ A module that allows you to resample a data feed
 #### SYNOPSIS
 
 ```
-  use Data::Resample::TicksCache;
+  use Data::Resample::DataCache;
   use Data::Resample::ResampleCache;
 
-  my $ticks_cache = Data::Resample::TicksCache->new({
+  my $data_cache = Data::Resample::DataCache->new({
         redis_read  => $redis,
         redis_write => $redis,
         });
@@ -26,13 +26,13 @@ A module that allows you to resample a data feed
         ...
   ];
 
-  #Use tick_cache_insert to insert a single data
+  #Use data_cache_insert to insert a single data
   foreach my $data (@data_feed) {
-        $ticks_cache->tick_cache_insert($data);
+        $data_cache->data_cache_insert($data);
   }
 
   #Use the get function to retrieve data
-  my $ticks = $ticks_cache->tick_cache_get_num_ticks({
+  my $data = $data_cache->data_cache_get_num_data({
         symbol    => 'Symbol',
         end_epoch => time+3
         num       => 3,
@@ -46,7 +46,7 @@ A module that allows you to resample a data feed
 
   $resample_cache->resample_cache_backfill({
         symbol => 'Symbol',
-        ticks  => \@data_feed,
+        data   => \@data_feed,
         });
 ```
 

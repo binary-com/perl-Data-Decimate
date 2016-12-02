@@ -22,20 +22,20 @@ sub resample_cache_backfill {
     my ($self, $args) = @_;
 
     my $symbol   = $args->{symbol}   // '';
-    my $ticks    = $args->{ticks}    // [];
+    my $data     = $args->{data}     // [];
     my $backtest = $args->{backtest} // 0;
 
     my $key = $self->_make_key($symbol, 0);
 
     if (not $backtest) {
-        foreach my $tick (@$ticks) {
-            $self->_update($self->redis_write, $key, $tick->{epoch}, $self->encoder->encode($tick));
+        foreach my $single_data (@$data) {
+            $self->_update($self->redis_write, $key, $single_data->{epoch}, $self->encoder->encode($single_data));
         }
     }
 
     return $self->_resample({
         symbol   => $symbol,
-        ticks    => $ticks,
+        data     => $data,
         backtest => $backtest,
     });
 }

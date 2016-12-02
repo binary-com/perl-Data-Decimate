@@ -1,4 +1,4 @@
-package Data::Resample::TicksCache;
+package Data::Resample::DataCache;
 
 use strict;
 use warnings;
@@ -16,31 +16,31 @@ my %prev_added_epoch;
 
 =head1 SUBROUTINES/METHODS
 
-=head2 tick_cache_insert
+=head2 data_cache_insert
 
-Also insert into resample cache if tick crosses 15s boundary.
+Also insert into resample cache if data crosses 15s boundary.
 
 =cut
 
-sub tick_cache_insert {
-    my ($self, $tick) = @_;
+sub data_cache_insert {
+    my ($self, $data) = @_;
 
-    $tick = $tick->as_hash if blessed($tick);
+    $data = $data->as_hash if blessed($data);
 
-    my %to_store = %$tick;
+    my %to_store = %$data;
 
-    $to_store{count} = 1;    # These are all single ticks;
+    $to_store{count} = 1;    # These are all single data;
     my $key = $self->_make_key($to_store{symbol}, 0);
 
     # check for resample interval boundary.
-    my $current_epoch = $tick->{epoch};
+    my $current_epoch = $data->{epoch};
     my $prev_added_epoch = $prev_added_epoch{$to_store{symbol}} // $current_epoch;
 
     my $boundary = $current_epoch - ($current_epoch % $self->sampling_frequency->seconds);
 
     if ($current_epoch > $boundary and $prev_added_epoch <= $boundary) {
         if (
-            my @ticks =
+            my @datas =
             map { $self->decoder->decode($_) }
             @{$self->redis_read->zrangebyscore($key, $boundary - $self->sampling_frequency->seconds - 1, $boundary)})
         {
@@ -48,10 +48,10 @@ sub tick_cache_insert {
             my $agg = $self->_resample({
                 symbol    => $to_store{symbol},
                 end_epoch => $boundary,
-                ticks     => \@ticks,
+                data      => \@datas,
             });
         } elsif (
-            my @agg = map {
+            my @resample_data = map {
                 $self->decoder->decode($_)
             } reverse @{
                 $self->redis_read->zrevrangebyscore(
@@ -60,25 +60,29 @@ sub tick_cache_insert {
                     0, 'LIMIT', 0, 1
                 )})
         {
-            my $tick = $agg[0];
-            $tick->{agg_epoch} = $boundary;
-            $tick->{count}     = 0;
-            $self->_update($self->redis_write, $self->_make_key($to_store{symbol}, 1), $tick->{agg_epoch}, $self->encoder->encode($tick));
+            my $single_data = $resample_data[0];
+            $single_data->{resample_epoch} = $boundary;
+            $single_data->{count}          = 0;
+            $self->_update(
+                $self->redis_write,
+                $self->_make_key($to_store{symbol}, 1),
+                $single_data->{agg_epoch},
+                $self->encoder->encode($single_data));
         }
     }
 
     $prev_added_epoch{$to_store{symbol}} = $current_epoch;
 
-    return $self->_update($self->redis_write, $key, $tick->{epoch}, $self->encoder->encode(\%to_store));
+    return $self->_update($self->redis_write, $key, $data->{epoch}, $self->encoder->encode(\%to_store));
 }
 
-=head2 tick_cache_get
+=head2 data_cache_get
 
-Retrieve ticks from start epoch till end epoch .
+Retrieve datas from start epoch till end epoch .
 
 =cut
 
-sub tick_cache_get {
+sub data_cache_get {
     my ($self, $args) = @_;
     my $symbol = $args->{symbol};
     my $start  = $args->{start_epoch} // 0;
@@ -89,13 +93,13 @@ sub tick_cache_get {
     return \@res;
 }
 
-=head2 tick_cache_get_num_ticks
+=head2 data_cache_get_num_data
 
-Retrieve num number of ticks from TicksCache.
+Retrieve num number of data from DataCache.
 
 =cut
 
-sub tick_cache_get_num_ticks {
+sub data_cache_get_num_data {
 
     my ($self, $args) = @_;
 

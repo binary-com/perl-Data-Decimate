@@ -32,10 +32,10 @@ Version 0.01
 
 =head1 SYNOPSIS
 
-  use Data::Resample::TicksCache;
+  use Data::Resample::DataCache;
   use Data::Resample::ResampleCache;
 
-  my $ticks_cache = Data::Resample::TicksCache->new({
+  my $data_cache = Data::Resample::TicksCache->new({
         redis_read  => $redis,
         redis_write => $redis,
         });
@@ -53,13 +53,13 @@ Version 0.01
         ...
   ];
 
-  #Use tick_cache_insert to insert a single data
+  #Use data_cache_insert to insert a single data
   foreach my $data (@data_feed) {
-  	$ticks_cache->tick_cache_insert($data);
+  	$data_cache->data_cache_insert($data);
   }
 
   #Use the get function to retrieve data
-  my $ticks = $ticks_cache->tick_cache_get_num_ticks({
+  my $data = $data_cache->data_cache_get_num_data({
         symbol    => 'Symbol',
         end_epoch => time+3,
         num       => 3,
@@ -73,7 +73,7 @@ Version 0.01
 
   $resample_cache->resample_cache_backfill({
 	symbol => 'Symbol',
-        ticks  => \@data_feed,
+        data  => \@data_feed,
         });
 
 =head1 DESCRIPTION
@@ -89,7 +89,7 @@ our $VERSION = '0.01';
 
 =head2 sampling_frequency
 
-=head2 tick_cache_size
+=head2 data_cache_size
 
 =head2 resample_cache_size
 
@@ -102,7 +102,7 @@ has sampling_frequency => (
     coerce  => 1,
 );
 
-has tick_cache_size => (
+has data_cache_size => (
     is      => 'ro',
     default => 1860,
 );
@@ -135,7 +135,7 @@ has raw_retention_interval => (
 );
 
 sub _build_raw_retention_interval {
-    my $interval = int(shift->tick_cache_size / 60);
+    my $interval = int(shift->data_cache_size / 60);
     return $interval . 'm';
 }
 
@@ -214,14 +214,14 @@ sub _check_missing_data {
     my $last_key    = $sorted_data[-1];
 
     for (my $i = $first_key; $i <= $last_key; $i = $i + $self->sampling_frequency->seconds) {
-        my $tick = $resample_data->{$i};
+        my $data = $resample_data->{$i};
 
-        if (not $tick) {
-            my $tick     = $resample_data->{$i - $self->sampling_frequency->seconds};
-            my %to_store = %$tick;
-            $to_store{agg_epoch} = $i;
-            $to_store{count}     = 0;
-            $resample_data->{$i} = \%to_store;
+        if (not $data) {
+            my $data     = $resample_data->{$i - $self->sampling_frequency->seconds};
+            my %to_store = %$data;
+            $to_store{resample_epoch} = $i;
+            $to_store{count}          = 0;
+            $resample_data->{$i}      = \%to_store;
         }
     }
 
@@ -237,26 +237,26 @@ sub _resample {
 
     my $ul       = $args->{symbol};
     my $end      = $args->{end_epoch} // time;
-    my $ticks    = $args->{ticks};
+    my $data     = $args->{data};
     my $backtest = $args->{backtest} // 0;
 
     my $ai = $self->sampling_frequency->seconds;    #default 15sec
 
-    my $agg_key = $self->_make_key($ul, 1);
+    my $resample_key = $self->_make_key($ul, 1);
 
-    my $counter        = 0;
-    my $prev_agg_epoch = 0;
+    my $counter             = 0;
+    my $prev_resample_epoch = 0;
     my %resample_data;
 
-    if ($ticks) {
+    if ($data) {
         %resample_data = map {
-            my $agg_epoch = ($_->{epoch} % $ai) == 0 ? $_->{epoch} : $_->{epoch} - ($_->{epoch} % $ai) + $ai;
-            $counter = ($agg_epoch == $prev_agg_epoch) ? $counter + 1 : 1;
-            $_->{count}     = $counter;
-            $_->{agg_epoch} = $agg_epoch;
-            $prev_agg_epoch = $agg_epoch;
-            ($agg_epoch) => $_
-        } @$ticks;
+            my $resample_epoch = ($_->{epoch} % $ai) == 0 ? $_->{epoch} : $_->{epoch} - ($_->{epoch} % $ai) + $ai;
+            $counter = ($resample_epoch == $prev_resample_epoch) ? $counter + 1 : 1;
+            $_->{count}          = $counter;
+            $_->{resample_epoch} = $resample_epoch;
+            $prev_resample_epoch = $resample_epoch;
+            ($resample_epoch) => $_
+        } @$data;
     }
 
     my $res = $self->_check_missing_data({
@@ -267,8 +267,8 @@ sub _resample {
 
     if (not $backtest) {
         foreach my $key (@sorted_data) {
-            my $tick = $res->{$key};
-            $self->_update($self->redis_write, $agg_key, $key, $self->encoder->encode($tick));
+            my $single_data = $res->{$key};
+            $self->_update($self->redis_write, $resample_key, $key, $self->encoder->encode($single_data));
         }
     }
 

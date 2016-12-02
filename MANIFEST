@@ -2,7 +2,7 @@
 Changes
 lib/Data/Resample.pm
 lib/Data/Resample/ResampleCache.pm
-lib/Data/Resample/TicksCache.pm
+lib/Data/Resample/DataCache.pm
 LICENSE
 Makefile.PL
 MANIFEST			This list of files
@@ -10,7 +10,7 @@ README.md
 t/00-load.t
 t/10-resample.t
 t/11-resample-exception.t
-t/tickdata.csv
-t/tickdata2.csv
+t/sampledata.csv
+t/sampledata2.csv
 xt/pod-coverage.t
 xt/pod.t
