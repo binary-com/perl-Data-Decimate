@@ -32,7 +32,7 @@ sub tick_cache_insert {
     $to_store{count} = 1;    # These are all single ticks;
     my $key = $self->_make_key($to_store{symbol}, 0);
 
-    # check for aggregation interval boundary.
+    # check for resample interval boundary.
     my $current_epoch = $tick->{epoch};
     my $prev_added_epoch = $prev_added_epoch{$to_store{symbol}} // $current_epoch;
 
@@ -44,8 +44,8 @@ sub tick_cache_insert {
             map { $self->decoder->decode($_) }
             @{$self->redis_read->zrangebyscore($key, $boundary - $self->sampling_frequency->seconds - 1, $boundary)})
         {
-            #do aggregation
-            my $agg = $self->_aggregate({
+            #do resampling
+            my $agg = $self->_resample({
                 symbol    => $to_store{symbol},
                 end_epoch => $boundary,
                 ticks     => \@ticks,
