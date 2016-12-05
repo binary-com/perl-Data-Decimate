@@ -32,49 +32,8 @@ Version 0.01
 
 =head1 SYNOPSIS
 
-  use Data::Resample::DataCache;
-  use Data::Resample::ResampleCache;
+  use Data::Resample;
 
-  my $data_cache = Data::Resample::DataCache->new({
-        redis_read  => $redis,
-        redis_write => $redis,
-        });
-
-  my @data_feed = [
-        {symbol => 'Symbol',
-        epoch  => time,
-        ...},
-        {symbol => 'Symbol',
-        epoch  => time+1,
-        ...},
-        {symbol => 'Symbol',
-        epoch  => time+2,
-        ...},
-        ...
-  ];
-
-  #Use data_cache_insert to insert a single data
-  foreach my $data (@data_feed) {
-  	$data_cache->data_cache_insert($data);
-  }
-
-  #Use the get function to retrieve data
-  my $data = $data_cache->data_cache_get_num_data({
-        symbol    => 'Symbol',
-        end_epoch => time+3,
-        num       => 3,
-        });
-  
-  #Backfill function
-  my $resample_cache = Data::Resample::ResampleCache->new({
-        redis_read  => $redis,
-        redis_write => $redis,
-        });
-
-  $resample_cache->resample_cache_backfill({
-	symbol => 'Symbol',
-        data  => \@data_feed,
-        });
 
 =head1 DESCRIPTION
 
