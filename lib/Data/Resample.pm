@@ -139,65 +139,13 @@ sub _build_raw_retention_interval {
     return $interval . 'm';
 }
 
-has decoder => (
-    is      => 'ro',
-    lazy    => 1,
-    builder => '_build_decoder',
-);
-
-sub _build_decoder {
-    return Sereal::Decoder->new;
-}
-
-has encoder => (
-    is      => 'ro',
-    lazy    => 1,
-    builder => '_build_encoder',
-);
-
 sub _build_encoder {
     return Sereal::Encoder->new({
         canonical => 1,
     });
 }
 
-has 'redis_read' => (
-    is       => 'ro',
-    required => 1
-);
-
-has 'redis_write' => (
-    is => 'ro',
-);
-
 =head1 SUBROUTINES/METHODS
-
-=head2 _make_key
-
-=cut
-
-sub _make_key {
-    my ($self, $symbol, $resample) = @_;
-
-    my @bits = ("RESAMPLE", $symbol);
-    if ($resample) {
-        push @bits, ($self->sampling_frequency->as_concise_string, 'RESAMPLE');
-    } else {
-        push @bits, ($self->raw_retention_interval->as_concise_string, 'FULL');
-    }
-
-    return join('_', @bits);
-}
-
-=head2 _update
-
-=cut 
-
-sub _update {
-    my ($self, $redis, $key, $score, $value) = @_;
-
-    return $redis->zadd($key, $score, $value);
-}
 
 =head2 _check_missing_data
 
@@ -231,17 +179,14 @@ sub _check_missing_data {
 
 =cut
 
-sub _resample {
+sub resample {
     my ($self, $args) = @_;
 
-    my $ul       = $args->{symbol};
     my $end      = $args->{end_epoch} // time;
     my $data     = $args->{data};
     my $backtest = $args->{backtest} // 0;
 
     my $ai = $self->sampling_frequency->seconds;    #default 15sec
-
-    my $resample_key = $self->_make_key($ul, 1);
 
     my $counter             = 0;
     my $prev_resample_epoch = 0;
@@ -263,13 +208,6 @@ sub _resample {
     });
 
     my @sorted_data = sort { $a <=> $b } keys %$res;
-
-    if (not $backtest) {
-        foreach my $key (@sorted_data) {
-            my $single_data = $res->{$key};
-            $self->_update($self->redis_write, $resample_key, $key, $self->encoder->encode($single_data));
-        }
-    }
 
     my @vals = map { $res->{$_} } @sorted_data;
     return \@vals;
