@@ -25,4 +25,3 @@ before_install:
     - "cpanm -n Text::CSV"
 script:
     - "perl Makefile.PL && make test"
-    - "kill $(ps aux | grep 'redis' | awk '{print $2}')"
