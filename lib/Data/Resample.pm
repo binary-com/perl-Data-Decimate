@@ -175,7 +175,7 @@ sub _check_missing_data {
     return $resample_data;
 }
 
-=head2 _resample
+=head2 resample
 
 =cut
 
