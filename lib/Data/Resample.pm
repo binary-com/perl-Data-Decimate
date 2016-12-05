@@ -48,10 +48,6 @@ our $VERSION = '0.01';
 
 =head2 sampling_frequency
 
-=head2 data_cache_size
-
-=head2 resample_cache_size
-
 =cut
 
 has sampling_frequency => (
@@ -60,49 +56,6 @@ has sampling_frequency => (
     default => '15s',
     coerce  => 1,
 );
-
-has data_cache_size => (
-    is      => 'ro',
-    default => 1860,
-);
-
-has resample_cache_size => (
-    is      => 'ro',
-    default => 2880,
-);
-
-has resample_retention_interval => (
-    is      => 'ro',
-    isa     => 'interval',
-    lazy    => 1,
-    coerce  => 1,
-    builder => '_build_resample_retention_interval',
-);
-
-sub _build_resample_retention_interval {
-    my $self = shift;
-    my $interval = int($self->resample_cache_size / (60 / $self->sampling_frequency->seconds));
-    return $interval . 'm';
-}
-
-has raw_retention_interval => (
-    is      => 'ro',
-    isa     => 'interval',
-    lazy    => 1,
-    coerce  => 1,
-    builder => '_build_raw_retention_interval',
-);
-
-sub _build_raw_retention_interval {
-    my $interval = int(shift->data_cache_size / 60);
-    return $interval . 'm';
-}
-
-sub _build_encoder {
-    return Sereal::Encoder->new({
-        canonical => 1,
-    });
-}
 
 =head1 SUBROUTINES/METHODS
 
@@ -141,9 +94,7 @@ sub _check_missing_data {
 sub resample {
     my ($self, $args) = @_;
 
-    my $end      = $args->{end_epoch} // time;
-    my $data     = $args->{data};
-    my $backtest = $args->{backtest} // 0;
+    my $data = $args->{data};
 
     my $ai = $self->sampling_frequency->seconds;    #default 15sec
 
