@@ -38,7 +38,7 @@ subtest "decimate_with_missing_data" => sub {
 
     is $output->[0]->{epoch}, '1479203101', "epoch is correct";
 
-}
+};
 
 sub datas_from_csv {
     my $filename = shift;
