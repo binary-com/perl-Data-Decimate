@@ -145,7 +145,7 @@ Binary.com, C<< <support at binary.com> >>
 =head1 BUGS
 
 Please report any bugs or feature requests to C<bug-data-resample at rt.cpan.org>, or through
-the web interface at L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Data-Resample>.  I will be notified, and then you'll
+the web interface at L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Data-Decimate>.  I will be notified, and then you'll
 automatically be notified of progress on your bug as I make changes.
 
 
@@ -155,7 +155,7 @@ automatically be notified of progress on your bug as I make changes.
 
 You can find documentation for this module with the perldoc command.
 
-    perldoc Data::Resample
+    perldoc Data::Decimate
 
 
 You can also look for information at:
@@ -164,19 +164,19 @@ You can also look for information at:
 
 =item * RT: CPAN's request tracker (report bugs here)
 
-L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=Data-Resample>
+L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=Data-Decimate>
 
 =item * AnnoCPAN: Annotated CPAN documentation
 
-L<http://annocpan.org/dist/Data-Resample>
+L<http://annocpan.org/dist/Data-Decimate>
 
 =item * CPAN Ratings
 
-L<http://cpanratings.perl.org/d/Data-Resample>
+L<http://cpanratings.perl.org/d/Data-Decimate>
 
 =item * Search CPAN
 
-L<http://search.cpan.org/dist/Data-Resample/>
+L<http://search.cpan.org/dist/Data-Decimate/>
 
 =back
 
@@ -227,7 +227,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 =cut
 
-# End of Data::Resample
+# End of Data::Decimate
 no Moose;
 
 __PACKAGE__->meta->make_immutable;
