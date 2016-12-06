@@ -23,11 +23,24 @@ subtest "resample" => sub {
 
     my $output = $resample->resample({data => $data, });
 
-    is scalar(@$data), '1', "resampled data";
+    is scalar(@$data), '142', "resampled 142 data";
 
     is $data->[0]->{epoch}, '1479203101', "epoch is correct";
 
 };
+
+subtest "resample_with_missing_data" => sub {
+    my $resample = Data::Resample->new;
+
+    ok $resample, "ResampleCache instance has been created";
+
+    my $output = $resample->resample({data => $data_missing, });
+
+    is scalar(@$data), '142', "resampled 142 data";
+
+    is $data->[0]->{epoch}, '1479203101', "epoch is correct";
+
+}
 
 sub datas_from_csv {
     my $filename = shift;
