@@ -85,15 +85,17 @@ sub _check_missing_data {
     my $first_key   = $sorted_data[0];
     my $last_key    = $sorted_data[-1];
 
-    for (my $i = $first_key; $i <= $last_key; $i = $i + $self->sampling_frequency->seconds) {
-        my $data = $decimate_data->{$i};
+    if (scalar(@sorted_data)) {
+        for (my $i = $first_key; $i <= $last_key; $i = $i + $self->sampling_frequency->seconds) {
+            my $data = $decimate_data->{$i};
 
-        if (not $data) {
-            my $data     = $decimate_data->{$i - $self->sampling_frequency->seconds};
-            my %to_store = %$data;
-            $to_store{resample_epoch} = $i;
-            $to_store{count}          = 0;
-            $decimate_data->{$i}      = \%to_store;
+            if (not $data) {
+                my $data     = $decimate_data->{$i - $self->sampling_frequency->seconds};
+                my %to_store = %$data;
+                $to_store{resample_epoch} = $i;
+                $to_store{count}          = 0;
+                $decimate_data->{$i}      = \%to_store;
+            }
         }
     }
 
