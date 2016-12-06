@@ -19,9 +19,9 @@ subtest "decimate" => sub {
 
     my $output = $data_dec->decimate({data => $data, });
 
-    is scalar(@$output), '142', "resampled 142 data";
+    is scalar(@$output), '10', "decimated data";
 
-    is $output->[0]->{epoch}, '1479203101', "epoch is correct";
+    is $output->[0]->{epoch}, '1479203114', "epoch is correct";
 
 };
 
@@ -34,9 +34,9 @@ subtest "decimate_with_missing_data" => sub {
 
     my $output = $data_dec->decimate({data => $data, });
 
-    is scalar(@$output), '142', "resampled 142 data";
+    is scalar(@$output), '10', "decimated data";
 
-    is $output->[0]->{epoch}, '1479203101', "epoch is correct";
+    is $output->[0]->{epoch}, '1479203114', "epoch is correct";
 
 };
 
