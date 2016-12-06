@@ -7,7 +7,7 @@ use Test::More;
 plan tests => 1;
 
 BEGIN {
-    use_ok( 'Data::Resample' ) || print "Bail out!\n";
+    use_ok( 'Data::Decimate' ) || print "Bail out!\n";
 }
 
-diag( "Testing Data::Resample $Data::Resample::VERSION, Perl $], $^X" );
+diag( "Testing Data::Decimate $Data::Decimate::VERSION, Perl $], $^X" );

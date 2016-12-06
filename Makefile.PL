@@ -4,10 +4,10 @@ use warnings;
 use ExtUtils::MakeMaker;
 
 WriteMakefile(
-    NAME             => 'Data::Resample',
+    NAME             => 'Data::Decimate',
     AUTHOR           => q{Binary.com <support@binary.com>},
-    VERSION_FROM     => 'lib/Data/Resample.pm',
-    ABSTRACT_FROM    => 'lib/Data/Resample.pm',
+    VERSION_FROM     => 'lib/Data/Decimate.pm',
+    ABSTRACT_FROM    => 'lib/Data/Decimate.pm',
     LICENSE          => 'artistic_2',
     PL_FILES         => {},
     MIN_PERL_VERSION => 5.006,
@@ -36,5 +36,5 @@ WriteMakefile(
         'Time::Duration::Concise'     => 0,
     },
     dist  => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
-    clean => { FILES => 'Data-Resample-*' },
+    clean => { FILES => 'Data-Decimate-*' },
 );

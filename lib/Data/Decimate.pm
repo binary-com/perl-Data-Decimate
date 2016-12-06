@@ -1,4 +1,4 @@
-package Data::Resample;
+package Data::Decimate;
 
 use strict;
 use warnings;
@@ -6,7 +6,6 @@ use warnings;
 use 5.010;
 use Moose;
 
-use RedisDB;
 use Date::Utility;
 use Sereal::Encoder;
 use Sereal::Decoder;
@@ -24,7 +23,7 @@ coerce 'interval', from 'Str', via { Time::Duration::Concise->new(interval => $_
 
 =head1 NAME
 
-Data::Resample - A module that allows to resample a data feed. 
+Data::Decimate - A module that allows to decimate a data feed. 
 
 =head1 VERSION
 
@@ -32,7 +31,21 @@ Version 0.01
 
 =head1 SYNOPSIS
 
-  use Data::Resample;
+  use Data::Decimate;
+
+  my $data_decimate = Data::Decimate->new;
+
+  my @data_feed = [
+        {epoch  => time,
+        ...},
+        {epoch  => time+1,
+        ...},
+        {epoch  => time+2,
+        ...},
+        ...
+  ];
+
+  my $output = $data_decimate->decimate(\@data_feed);
 
 
 =head1 DESCRIPTION
@@ -66,32 +79,34 @@ has sampling_frequency => (
 sub _check_missing_data {
     my ($self, $args) = @_;
 
-    my $resample_data = $args->{resample_data};
+    my $decimate_data = $args->{data};
 
-    my @sorted_data = sort { $a <=> $b } keys %$resample_data;
+    my @sorted_data = sort { $a <=> $b } keys %$decimate_data;
     my $first_key   = $sorted_data[0];
     my $last_key    = $sorted_data[-1];
 
     for (my $i = $first_key; $i <= $last_key; $i = $i + $self->sampling_frequency->seconds) {
-        my $data = $resample_data->{$i};
+        my $data = $decimate_data->{$i};
 
         if (not $data) {
-            my $data     = $resample_data->{$i - $self->sampling_frequency->seconds};
+            my $data     = $decimate_data->{$i - $self->sampling_frequency->seconds};
             my %to_store = %$data;
             $to_store{resample_epoch} = $i;
             $to_store{count}          = 0;
-            $resample_data->{$i}      = \%to_store;
+            $decimate_data->{$i}      = \%to_store;
         }
     }
 
-    return $resample_data;
+    return $decimate_data;
 }
 
-=head2 resample
+=head2 decimate
+
+Decimate a given data based on sampling frequency.
 
 =cut
 
-sub resample {
+sub decimate {
     my ($self, $args) = @_;
 
     my $data = $args->{data};
@@ -99,22 +114,22 @@ sub resample {
     my $ai = $self->sampling_frequency->seconds;    #default 15sec
 
     my $counter             = 0;
-    my $prev_resample_epoch = 0;
-    my %resample_data;
+    my $prev_decimate_epoch = 0;
+    my %decimate_data;
 
     if ($data) {
-        %resample_data = map {
-            my $resample_epoch = ($_->{epoch} % $ai) == 0 ? $_->{epoch} : $_->{epoch} - ($_->{epoch} % $ai) + $ai;
-            $counter = ($resample_epoch == $prev_resample_epoch) ? $counter + 1 : 1;
+        %decimate_data = map {
+            my $decimate_epoch = ($_->{epoch} % $ai) == 0 ? $_->{epoch} : $_->{epoch} - ($_->{epoch} % $ai) + $ai;
+            $counter = ($decimate_epoch == $prev_decimate_epoch) ? $counter + 1 : 1;
             $_->{count}          = $counter;
-            $_->{resample_epoch} = $resample_epoch;
-            $prev_resample_epoch = $resample_epoch;
-            ($resample_epoch) => $_
+            $_->{decimate_epoch} = $decimate_epoch;
+            $prev_decimate_epoch = $decimate_epoch;
+            ($decimate_epoch) => $_
         } @$data;
     }
 
     my $res = $self->_check_missing_data({
-        resample_data => \%resample_data,
+        data => \%decimate_data,
     });
 
     my @sorted_data = sort { $a <=> $b } keys %$res;

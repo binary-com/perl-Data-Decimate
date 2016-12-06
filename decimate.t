@@ -2,39 +2,37 @@ use strict;
 use warnings;
 
 use Date::Utility;
-use RedisDB;
 use Path::Tiny;
 use Test::More;
-use Test::RedisServer;
-use Test::TCP;
 use Test::FailWarnings;
 use Text::CSV;
 
-use Data::Resample;
+use Data::Decimate;
 
 my $data = datas_from_csv('t/sampledata.csv');
-my $data_missing = datas_from_csv('t/sampledata2.csv');
 
-subtest "resample" => sub {
+subtest "decimate" => sub {
 
-    my $resample = Data::Resample->new;
+    my $data_dec = Data::Decimate->new;
 
-    ok $resample, "ResampleCache instance has been created";
+    ok $data_dec, "Data Decimate instance has been created";
 
-    my $output = $resample->resample({data => $data, });
+    my $output = $data_dec->decimate({data => $data, });
 
     is scalar(@$output), '142', "resampled 142 data";
 
-    is $data->[0]->{epoch}, '1479203101', "epoch is correct";
+    is $output->[0]->{epoch}, '1479203101', "epoch is correct";
 
 };
 
-subtest "resample_with_missing_data" => sub {
-    my $resample = Data::Resample->new;
+$data = datas_from_csv('t/sampledata2.csv');
 
-    ok $resample, "ResampleCache instance has been created";
+subtest "decimate_with_missing_data" => sub {
+    my $data_dec = Data::Decimate->new;
 
-    my $output = $resample->resample({data => $data_missing, });
+    ok $data_dec, "Data Decimate instance has been created";
+
+    my $output = $data_dec->decimate({data => $data, });
 
     is scalar(@$output), '142', "resampled 142 data";
 
