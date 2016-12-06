@@ -12,13 +12,20 @@ use Text::CSV;
 
 use Data::Resample;
 
-my $datas = datas_from_csv('t/sampledata.csv');
+my $data = datas_from_csv('t/sampledata.csv');
+my $data_missing = datas_from_csv('t/sampledata2.csv');
 
 subtest "resample" => sub {
 
     my $resample = Data::Resample->new;
 
     ok $resample, "ResampleCache instance has been created";
+
+    my $output = $resample->resample({data => $data, });
+
+    is scalar(@$data), '1', "resampled data";
+
+    is $data->[0]->{epoch}, '1479203101', "epoch is correct";
 
 };
 
