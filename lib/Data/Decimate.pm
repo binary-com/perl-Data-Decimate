@@ -7,8 +7,6 @@ use 5.010;
 use Moose;
 
 use Date::Utility;
-use Sereal::Encoder;
-use Sereal::Decoder;
 
 use MooseX::Types::Moose qw(Int Num Str);
 use MooseX::Types -declare => [qw(
