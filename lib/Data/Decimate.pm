@@ -5,9 +5,7 @@ use warnings;
 
 use 5.010;
 
-use Exporter;
-
-our @ISA = qw(Exporter);
+use Exporter qw/import/;
 
 our @EXPORT_OK = qw(decimate);
 
