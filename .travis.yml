@@ -14,7 +14,6 @@ before_install:
     - perl -V
     - "cpanm -n Moose"
     - "cpanm -n List::Util"
-    - "cpanm -n Date::Utility"
     - "cpanm -n Scalar::Util"
     - "cpanm -n Time::Duration::Concise"
     - "cpanm -n MooseX::Types::Moose"

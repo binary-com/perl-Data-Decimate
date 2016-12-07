@@ -26,7 +26,6 @@ WriteMakefile(
         'Path::Tiny'         => 0,
     },
     PREREQ_PM => {
-        'Date::Utility'               => 0,
         'Scalar::Util'                => 0,
         'List::Util'                  => 0,
         'Time::Duration::Concise'     => 0,
