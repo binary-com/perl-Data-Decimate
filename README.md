@@ -5,21 +5,30 @@ A module that allows you to decimate a data feed
 #### SYNOPSIS
 
 ```
-  use Data::Decimate;
+  use Data::Decimate qw(decimate);
 
-  my $data_decimate = Data::Decimate->new;
-
-  my @data_feed = [
-        {epoch  => time,
+  my @data = [
+        {epoch  => 1479203101,
         ...},
-        {epoch  => time+1,
+        {epoch  => 1479203102,
         ...},
-        {epoch  => time+2,
+        {epoch  => 1479203103,
+        ...},
+        ...
+        {epoch  => 1479203114,
+        ...},
+        {epoch  => 1479203117,
+        ...},
+        {epoch  => 1479203118,
         ...},
         ...
   ];
 
-  my $output = $data_decimate->decimate(\@data_feed);
+  my $output = Data::Decimate::decimate(15, \@data);
+
+  #epoch=1479203114 , decimate_epoch=1479203115
+  print $output->[0]->{epoch};
+  print $output->[0]->{decimate_epoch};
 ```
 
 #### INSTALLATION
