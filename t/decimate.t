@@ -6,17 +6,13 @@ use Test::More;
 use Test::FailWarnings;
 use Text::CSV;
 
-use Data::Decimate;
+use Data::Decimate qw(decimate);
 
 my $data = datas_from_csv('t/sampledata.csv');
 
 subtest "decimate" => sub {
 
-    my $data_dec = Data::Decimate->new;
-
-    ok $data_dec, "Data Decimate instance has been created";
-
-    my $output = $data_dec->decimate({data => $data, });
+    my $output = Data::Decimate::decimate(15, $data);
 
     is scalar(@$output), '10', "decimated data";
 
@@ -27,11 +23,8 @@ subtest "decimate" => sub {
 $data = datas_from_csv('t/sampledata2.csv');
 
 subtest "decimate_with_missing_data" => sub {
-    my $data_dec = Data::Decimate->new;
 
-    ok $data_dec, "Data Decimate instance has been created";
-
-    my $output = $data_dec->decimate({data => $data, });
+    my $output = $data_dec->decimate(15, $data);
 
     is scalar(@$output), '10', "decimated data";
 
