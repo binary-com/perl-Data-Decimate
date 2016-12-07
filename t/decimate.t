@@ -24,7 +24,7 @@ $data = datas_from_csv('t/sampledata2.csv');
 
 subtest "decimate_with_missing_data" => sub {
 
-    my $output = $data_dec->decimate(15, $data);
+    my $output = Data::Decimate::decimate(15, $data);
 
     is scalar(@$output), '10', "decimated data";
 
