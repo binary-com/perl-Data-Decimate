@@ -1,7 +1,6 @@
 use strict;
 use warnings;
 
-use Date::Utility;
 use Path::Tiny;
 use Test::More;
 use Test::FailWarnings;
