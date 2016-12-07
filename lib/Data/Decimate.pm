@@ -4,18 +4,12 @@ use strict;
 use warnings;
 
 use 5.010;
-use Moose;
 
-use MooseX::Types::Moose qw(Int Num Str);
-use MooseX::Types -declare => [qw(
-        interval
-        )];
+use Exporter;
 
-use Moose::Util::TypeConstraints;
-use Time::Duration::Concise;
+our @ISA = qw(Exporter);
 
-subtype 'interval', as 'Time::Duration::Concise';
-coerce 'interval', from 'Str', via { Time::Duration::Concise->new(interval => $_) };
+our @EXPORT_OK = qw(decimate);
 
 =head1 NAME
 
@@ -52,41 +46,22 @@ A module that allows you to resample a data feed
 
 our $VERSION = '0.01';
 
-=head1 ATTRIBUTES
-=cut
-
-=head2 sampling_frequency
-
-=cut
-
-has sampling_frequency => (
-    is      => 'ro',
-    isa     => 'interval',
-    default => '15s',
-    coerce  => 1,
-);
-
 =head1 SUBROUTINES/METHODS
-
-=head2 _check_missing_data
-
 =cut
 
 sub _check_missing_data {
-    my ($self, $args) = @_;
-
-    my $decimate_data = $args->{data};
+    my ($interval, $decimate_data) = @_;
 
     my @sorted_data = sort { $a <=> $b } keys %$decimate_data;
     my $first_key   = $sorted_data[0];
     my $last_key    = $sorted_data[-1];
 
     if (scalar(@sorted_data)) {
-        for (my $i = $first_key; $i <= $last_key; $i = $i + $self->sampling_frequency->seconds) {
+        for (my $i = $first_key; $i <= $last_key; $i = $i + $interval) {
             my $data = $decimate_data->{$i};
 
             if (not $data) {
-                my $data     = $decimate_data->{$i - $self->sampling_frequency->seconds};
+                my $data     = $decimate_data->{$i - $interval};
                 my %to_store = %$data;
                 $to_store{resample_epoch} = $i;
                 $to_store{count}          = 0;
@@ -105,11 +80,11 @@ Decimate a given data based on sampling frequency.
 =cut
 
 sub decimate {
-    my ($self, $args) = @_;
+    my ($interval, $data) = @_;
 
-    my $data = $args->{data};
-
-    my $ai = $self->sampling_frequency->seconds;    #default 15sec
+    if (not defined $interval or not defined $data) {
+        die "interval and data are required parameters.";
+    }
 
     my $counter             = 0;
     my $prev_decimate_epoch = 0;
@@ -117,7 +92,7 @@ sub decimate {
 
     if ($data) {
         %decimate_data = map {
-            my $decimate_epoch = ($_->{epoch} % $ai) == 0 ? $_->{epoch} : $_->{epoch} - ($_->{epoch} % $ai) + $ai;
+            my $decimate_epoch = ($_->{epoch} % $interval) == 0 ? $_->{epoch} : $_->{epoch} - ($_->{epoch} % $interval) + $interval;
             $counter = ($decimate_epoch == $prev_decimate_epoch) ? $counter + 1 : 1;
             $_->{count}          = $counter;
             $_->{decimate_epoch} = $decimate_epoch;
@@ -126,9 +101,7 @@ sub decimate {
         } @$data;
     }
 
-    my $res = $self->_check_missing_data({
-        data => \%decimate_data,
-    });
+    my $res = _check_missing_data($interval, \%decimate_data);
 
     my @sorted_data = sort { $a <=> $b } keys %$res;
 
@@ -224,10 +197,5 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 =cut
-
-# End of Data::Decimate
-no Moose;
-
-__PACKAGE__->meta->make_immutable;
 
 1;
