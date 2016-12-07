@@ -57,7 +57,7 @@ our $VERSION = '0.01';
 =head1 SUBROUTINES/METHODS
 =cut
 
-sub _check_missing_data {
+sub _fill_missing_data {
     my ($interval, $decimate_data) = @_;
 
     my @sorted_data = sort { $a <=> $b } keys %$decimate_data;
@@ -71,7 +71,7 @@ sub _check_missing_data {
             if (not $data) {
                 my $data     = $decimate_data->{$i - $interval};
                 my %to_store = %$data;
-                $to_store{resample_epoch} = $i;
+                $to_store{decimate_epoch} = $i;
                 $to_store{count}          = 0;
                 $decimate_data->{$i}      = \%to_store;
             }
@@ -109,7 +109,7 @@ sub decimate {
         } @$data;
     }
 
-    my $res = _check_missing_data($interval, \%decimate_data);
+    my $res = _fill_missing_data($interval, \%decimate_data);
 
     my @sorted_data = sort { $a <=> $b } keys %$res;
 
