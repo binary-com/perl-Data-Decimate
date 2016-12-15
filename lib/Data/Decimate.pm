@@ -107,12 +107,9 @@ sub decimate {
         } @$data;
     }
 
-    my $res = _fill_missing_data($interval, \%decimate_data);
-
-    my @sorted_data = sort { $a <=> $b } keys %$res;
-
-    my @vals = map { $res->{$_} } @sorted_data;
-    return \@vals;
+    my $tmp = _fill_missing_data($interval, \%decimate_data);
+    my @res = map { $res->{$_} } sort { $a <=> $b } keys %$tmp;
+    return \@res;
 }
 
 =head1 AUTHOR
