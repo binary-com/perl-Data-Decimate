@@ -108,7 +108,7 @@ sub decimate {
     }
 
     my $tmp = _fill_missing_data($interval, \%decimate_data);
-    my @res = map { $res->{$_} } sort { $a <=> $b } keys %$tmp;
+    my @res = map { $tmp->{$_} } sort { $a <=> $b } keys %$tmp;
     return \@res;
 }
 
