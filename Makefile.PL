@@ -19,8 +19,6 @@ WriteMakefile(
         'Test::Deep'         => 0,
         'Test::NoWarnings'   => 0,
         'Test::Exception'    => 0,
-        'Moose'              => 0,
-        'Moose::Util::TypeConstraints'   => 0,
         'Test::Perl::Critic' => 0,
         'Text::CSV'          => 0,
         'Path::Tiny'         => 0,
