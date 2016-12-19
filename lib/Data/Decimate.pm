@@ -88,7 +88,7 @@ Decimate a given data based on sampling frequency.
 sub decimate {
     my ($interval, $data) = @_;
 
-    if (not defined $interval or not defined $data) {
+    if (not defined $interval or not defined $data or ref($data) ne "ARRAY") {
         die "interval and data are required parameters.";
     }
 
