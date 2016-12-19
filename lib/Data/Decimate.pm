@@ -96,16 +96,14 @@ sub decimate {
     my $prev_decimate_epoch = 0;
     my %decimate_data;
 
-    if ($data) {
-        %decimate_data = map {
-            my $decimate_epoch = ($_->{epoch} % $interval) == 0 ? $_->{epoch} : $_->{epoch} - ($_->{epoch} % $interval) + $interval;
-            $counter = ($decimate_epoch == $prev_decimate_epoch) ? $counter + 1 : 1;
-            $_->{count}          = $counter;
-            $_->{decimate_epoch} = $decimate_epoch;
-            $prev_decimate_epoch = $decimate_epoch;
-            ($decimate_epoch) => $_
-        } @$data;
-    }
+    %decimate_data = map {
+        my $decimate_epoch = ($_->{epoch} % $interval) == 0 ? $_->{epoch} : $_->{epoch} - ($_->{epoch} % $interval) + $interval;
+        $counter = ($decimate_epoch == $prev_decimate_epoch) ? $counter + 1 : 1;
+        $_->{count}          = $counter;
+        $_->{decimate_epoch} = $decimate_epoch;
+        $prev_decimate_epoch = $decimate_epoch;
+        $decimate_epoch => $_
+    } @$data;
 
     my $tmp = _fill_missing_data($interval, \%decimate_data);
     my @res = map { $tmp->{$_} } sort { $a <=> $b } keys %$tmp;
