@@ -1,6 +1,7 @@
 # perl-Data-Decimate
 
-A module that allows you to decimate a data feed
+A module that allows you to decimate or reduce a data feed by selecting the last data in a given interval.
+See also https://en.wikipedia.org/wiki/Decimation_(signal_processing) .
 
 #### SYNOPSIS
 
