@@ -18,6 +18,7 @@ WriteMakefile(
         'Test::More'         => 0,
         'Test::Deep'         => 0,
         'Test::NoWarnings'   => 0,
+        'Test::FailWarnings' => 0,
         'Test::Exception'    => 0,
         'Test::Perl::Critic' => 0,
         'Text::CSV'          => 0,
