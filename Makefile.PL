@@ -24,9 +24,6 @@ WriteMakefile(
         'Path::Tiny'         => 0,
     },
     PREREQ_PM => {
-        'Scalar::Util'                => 0,
-        'List::Util'                  => 0,
-        'Time::Duration::Concise'     => 0,
     },
     dist  => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
     clean => { FILES => 'Data-Decimate-*' },
