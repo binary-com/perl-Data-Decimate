@@ -55,30 +55,6 @@ our $VERSION = '0.01';
 =head1 SUBROUTINES/METHODS
 =cut
 
-sub _fill_missing_data {
-    my ($interval, $decimate_data) = @_;
-
-    my @sorted_data = sort { $a <=> $b } keys %$decimate_data;
-    my $first_key   = $sorted_data[0];
-    my $last_key    = $sorted_data[-1];
-
-    if (scalar(@sorted_data)) {
-        for (my $i = $first_key; $i <= $last_key; $i = $i + $interval) {
-            my $data = $decimate_data->{$i};
-
-            if (not $data) {
-                my $data     = $decimate_data->{$i - $interval};
-                my %to_store = %$data;
-                $to_store{decimate_epoch} = $i;
-                $to_store{count}          = 0;
-                $decimate_data->{$i}      = \%to_store;
-            }
-        }
-    }
-
-    return $decimate_data;
-}
-
 =head2 decimate
 
 Decimate a given data based on sampling frequency.
@@ -92,21 +68,46 @@ sub decimate {
         die "interval and data are required parameters.";
     }
 
-    my $counter             = 0;
-    my $prev_decimate_epoch = 0;
-    my %decimate_data;
+    my @res;
+    my $el = $data->[0];
+    my $de = do {
+        use integer;
+        (($el->{epoch} + $interval - 1) / $interval) * $interval;
+    };
+    $el->{count}          = 1;
+    $el->{decimate_epoch} = $de;
 
-    %decimate_data = map {
-        my $decimate_epoch = ($_->{epoch} % $interval) == 0 ? $_->{epoch} : $_->{epoch} - ($_->{epoch} % $interval) + $interval;
-        $counter = ($decimate_epoch == $prev_decimate_epoch) ? $counter + 1 : 1;
-        $_->{count}          = $counter;
-        $_->{decimate_epoch} = $decimate_epoch;
-        $prev_decimate_epoch = $decimate_epoch;
-        $decimate_epoch => $_
-    } @$data;
+    push @res, $el;
 
-    my $tmp = _fill_missing_data($interval, \%decimate_data);
-    my @res = map { $tmp->{$_} } sort { $a <=> $b } keys %$tmp;
+    for (my $i = 1; $i < @$data; $i++) {
+        $el = $data->[$i];
+        $de = do {
+            use integer;
+            (($el->{epoch} + $interval - 1) / $interval) * $interval;
+        };
+
+        # same decimate_epoch
+        if ($de == $res[-1]->{decimate_epoch}) {
+            $res[-1]->{count}++;
+            $el->{decimate_epoch} = $de;
+            $res[-1] = $el;
+            next;
+        }
+
+        # fill in the gaps if any
+        while ($res[-1]->{decimate_epoch} + $interval < $de) {
+            my %clone = %{$res[-1]};
+            $clone{count} = 0;
+            $clone{decimate_epoch} += $interval;
+            push @res, \%clone;
+        }
+
+        # and finally add the current element
+        $el->{count}          = 1;
+        $el->{decimate_epoch} = $de;
+        push @res, $el;
+    }
+
     return \@res;
 }
 
