@@ -8,7 +8,7 @@ See also https://en.wikipedia.org/wiki/Decimation_(signal_processing) .
 ```
   use Data::Decimate qw(decimate);
 
-  my @data = [
+  my @data = (
         {epoch  => 1479203101,
         ...},
         {epoch  => 1479203102,
@@ -23,7 +23,7 @@ See also https://en.wikipedia.org/wiki/Decimation_(signal_processing) .
         {epoch  => 1479203118,
         ...},
         ...
-  ];
+  );
 
   my $output = Data::Decimate::decimate(15, \@data);
 

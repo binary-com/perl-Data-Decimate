@@ -21,7 +21,7 @@ Version 0.01
 
   use Data::Decimate qw(decimate);
 
-  my @data = [
+  my @data = (
         {epoch  => 1479203101,
         ...},
         {epoch  => 1479203102,
@@ -36,7 +36,7 @@ Version 0.01
         {epoch  => 1479203118,
         ...},
         ...
-  ];
+  );
 
   my $output = Data::Decimate::decimate(15, \@data);
 
