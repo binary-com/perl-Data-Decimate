@@ -1,21 +1,57 @@
-# perl-Data-Resample
+# perl-Data-Decimate
 
-Data::Resample
+A module that allows you to decimate or reduce a data feed by selecting the last data in a given interval.
+See also https://en.wikipedia.org/wiki/Decimation_(signal_processing) .
 
-A module that allows you to resample a data feed
+#### SYNOPSIS
 
-sampling_frequency=15
-tick_cache_size = 30*60
-resample_cache_size = 12*60*60
-redis=xxxx
+```
+  use Data::Decimate qw(decimate);
 
-1) TICKS CACHE: Cache of all ticks in last tick_cache_size seconds
+  my @data = (
+        {epoch  => 1479203101,
+        ...},
+        {epoch  => 1479203102,
+        ...},
+        {epoch  => 1479203103,
+        ...},
+        ...
+        {epoch  => 1479203114,
+        ...},
+        {epoch  => 1479203117,
+        ...},
+        {epoch  => 1479203118,
+        ...},
+        ...
+  );
 
-  ->tick_cache_insert(symbol,epoch, value)     WILL ALSO INSERT INTO RESAMPLE CACHE IF THE TICK CROSSES THE 15s BOUNDARY
-  ->tick_cache_get(symbol,startepoch,endepoch)    
-  ->tick_cache_get_num_ticks(symbol,endepoch,num)  
+  my $output = Data::Decimate::decimate(15, \@data);
 
-2) RESAMPLE CACHE
+  #epoch=1479203114 , decimate_epoch=1479203115
+  print $output->[0]->{epoch};
+  print $output->[0]->{decimate_epoch};
+```
 
-  ->resample_cache_backfill(@ticks)
-  ->resample_cache_get(symbol,startepoch,endepoch)  
+#### INSTALLATION
+
+To install this module, run the following commands:
+
+        perl Makefile.PL
+        make
+        make test
+        make install
+
+#### USAGE
+
+```
+    use Data::Decimate;
+```
+
+#### SUPPORT AND DOCUMENTATION
+
+After installing, you can find documentation for this module with the
+perldoc command.
+
+    perldoc Data::Decimate
+
+Copyright (C) 2016 binary.com 
