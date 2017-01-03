@@ -69,33 +69,33 @@ sub decimate {
     }
 
     my @res;
-    my $el = $data->[0];
-    my $de = do {
+    my $el             = $data->[0];
+    my $decimate_epoch = do {
         use integer;
         (($el->{epoch} + $interval - 1) / $interval) * $interval;
     };
     $el->{count}          = 1;
-    $el->{decimate_epoch} = $de;
+    $el->{decimate_epoch} = $decimate_epoch;
 
     push @res, $el;
 
     for (my $i = 1; $i < @$data; $i++) {
-        $el = $data->[$i];
-        $de = do {
+        $el             = $data->[$i];
+        $decimate_epoch = do {
             use integer;
             (($el->{epoch} + $interval - 1) / $interval) * $interval;
         };
 
         # same decimate_epoch
-        if ($de == $res[-1]->{decimate_epoch}) {
+        if ($decimate_epoch == $res[-1]->{decimate_epoch}) {
             $res[-1]->{count}++;
-            $el->{decimate_epoch} = $de;
+            $el->{decimate_epoch} = $decimate_epoch;
             $res[-1] = $el;
             next;
         }
 
         # fill in the gaps if any
-        while ($res[-1]->{decimate_epoch} + $interval < $de) {
+        while ($res[-1]->{decimate_epoch} + $interval < $decimate_epoch) {
             my %clone = %{$res[-1]};
             $clone{count} = 0;
             $clone{decimate_epoch} += $interval;
@@ -104,7 +104,7 @@ sub decimate {
 
         # and finally add the current element
         $el->{count}          = 1;
-        $el->{decimate_epoch} = $de;
+        $el->{decimate_epoch} = $decimate_epoch;
         push @res, $el;
     }
 
