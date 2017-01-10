@@ -73,11 +73,11 @@ sub decimate {
     my $decimate_epoch = do {
         use integer;
         (($el->{epoch} + $interval - 1) / $interval) * $interval;
-    };
+    } if $el;
     $el->{count}          = 1;
     $el->{decimate_epoch} = $decimate_epoch;
 
-    push @res, $el;
+    push @res, $el if $el;
 
     for (my $i = 1; $i < @$data; $i++) {
         $el             = $data->[$i];
