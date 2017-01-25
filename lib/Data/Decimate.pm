@@ -90,7 +90,8 @@ sub decimate {
         if ($decimate_epoch == $res[-1]->{decimate_epoch}) {
             $res[-1]->{count}++;
             $el->{decimate_epoch} = $decimate_epoch;
-            $res[-1] = $el;
+            $el->{count}          = $res[-1]->{count};
+            $res[-1]              = $el;
             next;
         }
 
