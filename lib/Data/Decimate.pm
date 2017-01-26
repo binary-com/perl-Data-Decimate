@@ -15,7 +15,7 @@ Data::Decimate - A module that allows to decimate a data feed.
 
 =head1 VERSION
 
-Version 0.01
+Version 0.02
 
 =head1 SYNOPSIS
 
@@ -50,7 +50,7 @@ A module that allows you to resample a data feed
 
 =cut
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 =head1 SUBROUTINES/METHODS
 =cut
@@ -73,11 +73,11 @@ sub decimate {
     my $decimate_epoch = do {
         use integer;
         (($el->{epoch} + $interval - 1) / $interval) * $interval;
-    } if $el;
+    } if $data->[0];
     $el->{count}          = 1;
     $el->{decimate_epoch} = $decimate_epoch;
 
-    push @res, $el if $el;
+    push @res, $el if $data->[0];
 
     for (my $i = 1; $i < @$data; $i++) {
         $el             = $data->[$i];
@@ -90,7 +90,8 @@ sub decimate {
         if ($decimate_epoch == $res[-1]->{decimate_epoch}) {
             $res[-1]->{count}++;
             $el->{decimate_epoch} = $decimate_epoch;
-            $res[-1] = $el;
+            $el->{count}          = $res[-1]->{count};
+            $res[-1]              = $el;
             next;
         }
 
