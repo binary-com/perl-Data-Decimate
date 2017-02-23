@@ -11,7 +11,7 @@ our @EXPORT_OK = qw(decimate);
 
 =head1 NAME
 
-Data::Decimate - A module that allows to decimate a data feed. 
+Data::Decimate - A module that allows to decimate a data feed.
 
 =head1 SYNOPSIS
 
@@ -19,19 +19,25 @@ Data::Decimate - A module that allows to decimate a data feed.
 
   my @data = (
         {epoch  => 1479203101,
-        ...},
+        #...
+        },
         {epoch  => 1479203102,
-        ...},
+        #...
+        },
         {epoch  => 1479203103,
-        ...},
-        ...
+        #...
+        },
+        #...
         {epoch  => 1479203114,
-        ...},
+        #...
+        },
         {epoch  => 1479203117,
-        ...},
+        #...
+        },
         {epoch  => 1479203118,
-        ...},
-        ...
+        #...
+        },
+        #...
   );
 
   my $output = Data::Decimate::decimate(15, \@data);
@@ -66,7 +72,8 @@ sub decimate {
 
     my @res;
     my $el             = $data->[0];
-    my $decimate_epoch = do {
+    my $decimate_epoch;
+    $decimate_epoch = do {
         use integer;
         (($el->{epoch} + $interval - 1) / $interval) * $interval;
     } if $data->[0];
