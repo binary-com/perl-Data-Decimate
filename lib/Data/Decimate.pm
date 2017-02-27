@@ -52,7 +52,7 @@ A module that allows you to resample a data feed
 
 =cut
 
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 =head1 SUBROUTINES/METHODS
 =cut
@@ -71,7 +71,7 @@ sub decimate {
     }
 
     my @res;
-    my $el             = $data->[0];
+    my $el = $data->[0];
     my $decimate_epoch;
     $decimate_epoch = do {
         use integer;
